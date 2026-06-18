@@ -1,0 +1,1495 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>My Bar</title>
+
+<!-- PWA: 加入主畫面後可全螢幕顯示，像獨立App -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#111010">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="My Bar">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" href="icon-192.png">
+
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#111010;--bg2:#1a1918;--bg3:#242220;--bg4:#2e2b29;
+  --border:#2e2b29;--border2:#3a3734;
+  --text:#f0ece3;--muted:#7a7672;--hint:#4a4845;
+  --accent:#c9a84c;--a2:#1a1400;--a3:#8b6820;
+  --red:#c05050;--green:#4a9a6a;
+  --r:12px;--rs:8px;
+}
+html,body{height:100%;background:var(--bg);font-family:'DM Sans',sans-serif;color:var(--text);overflow:hidden}
+#app{height:100dvh;display:flex;flex-direction:column;max-width:480px;margin:0 auto}
+.screen{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding-bottom:72px}
+.screen::-webkit-scrollbar{display:none}
+
+.topbar{padding:max(14px,calc(env(safe-area-inset-top) + 6px)) 16px 12px;background:var(--bg2);border-bottom:0.5px solid var(--border);display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:10}
+.topbar-title{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:500;color:var(--text);flex:1}
+.back-btn{background:none;border:none;color:var(--muted);cursor:pointer;font-size:22px;padding:0;display:flex;align-items:center;flex-shrink:0}
+.icon-btn{background:none;border:none;color:var(--accent);cursor:pointer;font-size:22px;padding:0;display:flex;align-items:center;flex-shrink:0}
+
+.botnav{background:var(--bg2);border-top:0.5px solid var(--border);display:flex;padding:6px 0 max(8px,env(safe-area-inset-bottom));position:sticky;bottom:0;z-index:10}
+.bnbtn{flex:1;background:none;border:none;color:var(--muted);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px 2px;font-size:9px;font-family:'DM Sans',sans-serif}
+.bnbtn.active{color:var(--accent)}
+
+/* home */
+.home-hero{padding:max(22px,calc(env(safe-area-inset-top) + 14px)) 16px 14px;background:var(--bg2);border-bottom:0.5px solid var(--border)}
+.home-logo{font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:600;color:var(--accent)}
+.home-tagline{font-size:12px;color:var(--muted);margin-top:3px}
+.home-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:12px 16px}
+.hcard{background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--r);padding:14px 12px;cursor:pointer;display:flex;flex-direction:column;gap:7px;min-height:90px}
+.hcard:active{opacity:.75}
+.hcard.wide{grid-column:span 2}
+.hcard.featured{border-color:var(--a3);background:var(--a2)}
+.hcard-icon{font-size:20px}
+.hcard-label{font-size:13px;font-weight:500;color:var(--text)}
+.hcard-sub{font-size:11px;color:var(--muted)}
+
+/* search */
+.search-bar{padding:10px 16px;border-bottom:0.5px solid var(--border);background:var(--bg2);position:sticky;top:49px;z-index:9}
+.search-bar input{width:100%;background:var(--bg3);border:0.5px solid var(--border);border-radius:var(--rs);color:var(--text);padding:8px 12px;font-size:13px;font-family:'DM Sans',sans-serif;outline:none}
+.search-bar input::placeholder{color:var(--hint)}
+.search-bar input:focus{border-color:var(--a3)}
+
+/* list */
+.list-body{padding:10px 16px;display:flex;flex-direction:column;gap:8px}
+.rcard{background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--r);display:flex;overflow:hidden;cursor:pointer}
+.rcard:active{opacity:.75}
+.rcard-img{width:70px;min-height:70px;background:var(--bg3);flex-shrink:0;display:flex;align-items:center;justify-content:center;overflow:hidden;font-size:26px}
+.rcard-img img{width:100%;height:100%;object-fit:cover}
+.rcard-body{padding:10px 12px;flex:1;min-width:0}
+.rcard-name{font-size:14px;font-weight:500;color:var(--text)}
+.rcard-meta{font-size:11px;color:var(--muted);margin-top:2px}
+.rcard-tags{display:flex;gap:4px;flex-wrap:wrap;margin-top:5px}
+.group-label{font-size:11px;color:var(--accent);font-weight:500;letter-spacing:1px;text-transform:uppercase;margin:14px 2px 8px;display:flex;align-items:center;gap:6px}
+.group-label:first-child{margin-top:2px}
+.group-count{font-size:10px;color:var(--muted);font-weight:400;letter-spacing:0;text-transform:none}
+.tag{font-size:10px;padding:2px 7px;border-radius:5px;background:var(--bg3);border:0.5px solid var(--border);color:var(--muted)}
+.tag.ac{border-color:var(--a3);color:var(--accent);background:var(--a2)}
+
+/* detail */
+.det-img{width:100%;height:190px;background:var(--bg3);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;font-size:56px;opacity:.3}
+.det-img img{width:100%;height:100%;object-fit:cover;opacity:1}
+.upload-btn{position:absolute;bottom:10px;right:10px;background:rgba(0,0,0,.6);border:0.5px solid var(--border2);border-radius:7px;color:var(--muted);font-size:11px;padding:5px 10px;cursor:pointer;display:flex;align-items:center;gap:4px}
+.det-body{padding:14px 16px}
+.det-name{font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:500;margin-bottom:6px}
+.det-meta{display:flex;gap:7px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+.badge{font-size:11px;padding:3px 10px;border-radius:20px;background:var(--bg3);color:var(--muted);border:0.5px solid var(--border)}
+.det-desc{font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:16px}
+.sec{font-size:10px;color:var(--accent);font-weight:500;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px}
+
+.ingr-list{display:flex;flex-direction:column;gap:5px;margin-bottom:16px}
+.ingr-block{background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--rs);overflow:hidden}
+.ingr-main{display:flex;justify-content:space-between;align-items:center;padding:9px 12px}
+.ingr-zh{font-size:13px;font-weight:500}
+.ingr-en{font-size:11px;color:var(--muted)}
+.ingr-amt{color:var(--accent);font-size:12px;font-weight:500;white-space:nowrap;margin-left:8px}
+.bottle-row{border-top:0.5px solid var(--border);padding:6px 12px;display:flex;align-items:center;gap:7px}
+.bottle-row label{font-size:11px;color:var(--muted);white-space:nowrap;flex-shrink:0}
+.bottle-row select{flex:1;background:var(--bg3);border:0.5px solid var(--border);border-radius:6px;color:var(--text);font-size:11px;padding:4px 7px;outline:none;font-family:'DM Sans',sans-serif;min-width:0}
+.bottle-info{padding:7px 12px 9px;border-top:0.5px solid var(--border);background:var(--bg3)}
+.bi-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
+.abv-num{font-size:15px;font-weight:500}
+.abv-sub{font-size:10px;color:var(--muted)}
+.sbar-row{display:flex;gap:2px}
+.sbar{width:8px;height:8px;border-radius:2px;background:var(--bg4);border:0.5px solid var(--border)}
+.sbar.on{background:var(--accent);border-color:var(--accent)}
+.flavor-row{display:flex;flex-wrap:wrap;gap:3px}
+.ftag{font-size:10px;background:var(--bg2);border:0.5px solid var(--border);border-radius:4px;padding:2px 6px;color:#999}
+
+.mg-row{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:16px}
+.mg-card{background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--rs);padding:10px 11px}
+.mgl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+.mgv{font-size:13px;font-weight:500}
+.mgs{font-size:11px;color:var(--muted);margin-top:3px;line-height:1.3}
+
+.steps{display:flex;flex-direction:column;gap:7px;margin-bottom:16px}
+.step-row{display:flex;gap:9px;align-items:flex-start;font-size:13px;line-height:1.5;color:#ccc}
+.snum{background:var(--accent);color:#1a1200;width:21px;height:21px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:500;flex-shrink:0;margin-top:1px}
+
+.garnish-card{background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--rs);padding:11px 13px;margin-bottom:16px}
+.gtitle{font-size:10px;color:var(--accent);font-weight:500;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:7px}
+.gi{display:flex;align-items:flex-start;gap:7px;font-size:13px;margin-bottom:5px;line-height:1.5}
+.gi:last-child{margin-bottom:0}
+.gdot{width:5px;height:5px;border-radius:50%;background:var(--accent);flex-shrink:0;margin-top:5px}
+.gnote{font-size:11px;color:var(--muted);margin-top:2px}
+
+.action-row{display:flex;gap:8px}
+.btn-fav{flex:1;background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--rs);color:var(--text);padding:11px;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;gap:5px;font-family:'DM Sans',sans-serif}
+.btn-fav.on{border-color:var(--accent);color:var(--accent)}
+.btn-del{background:none;border:0.5px solid var(--red);border-radius:var(--rs);color:var(--red);padding:11px 14px;cursor:pointer;font-size:13px}
+.btn-edit-det{background:var(--bg3);border:0.5px solid var(--border2);border-radius:var(--rs);color:var(--muted);padding:11px 14px;cursor:pointer;font-size:13px}
+
+/* cabinet */
+.bottle-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:10px 16px}
+.bc{background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--r);overflow:hidden}
+.bc-img{width:100%;height:95px;background:var(--bg3);display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;font-size:32px;opacity:.4}
+.bc-img img{width:100%;height:100%;object-fit:cover;opacity:1}
+.bc-upload{position:absolute;bottom:4px;right:4px;background:rgba(0,0,0,.55);border:0.5px solid var(--border);border-radius:5px;color:var(--muted);font-size:10px;padding:3px 7px;cursor:pointer}
+.bc-body{padding:8px 10px}
+.bc-name{font-size:12px;font-weight:500;line-height:1.3}
+.bc-en{font-size:10px;color:var(--muted);margin-top:1px}
+.bc-abv{font-size:11px;color:var(--accent);margin-top:4px}
+.bc-tags{display:flex;flex-wrap:wrap;gap:3px;margin-top:4px}
+.bc-tag{font-size:10px;background:var(--bg3);border:0.5px solid var(--border);border-radius:4px;padding:1px 6px;color:#888}
+
+/* special */
+.sp-body{padding:12px 16px;display:flex;flex-direction:column;gap:12px}
+.sl{font-size:10px;color:var(--accent);font-weight:500;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:7px}
+.cat-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.cat-card{background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--r);padding:13px 11px;cursor:pointer;display:flex;flex-direction:column;gap:5px}
+.cat-card:active{opacity:.75}
+.cat-card.on{background:var(--a2);border-color:var(--a3)}
+.cc-name{font-size:13px;font-weight:500}
+.cc-count{font-size:11px;color:var(--muted)}
+.pref-group{background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--rs);padding:10px 12px}
+.pref-title{font-size:13px;font-weight:500;margin-bottom:8px}
+.pref-opts{display:flex;gap:5px;flex-wrap:wrap}
+.popt{font-size:12px;padding:5px 10px;border-radius:20px;border:0.5px solid var(--border);background:var(--bg3);color:var(--muted);cursor:pointer}
+.popt:active{opacity:.75}
+.popt.on{background:var(--a2);border-color:var(--a3);color:var(--accent);font-weight:500}
+.btn-gen{width:100%;background:var(--accent);border:none;border-radius:var(--rs);color:#1a1200;font-size:14px;font-weight:500;padding:13px;cursor:pointer;font-family:'DM Sans',sans-serif}
+.btn-gen:disabled{background:var(--bg3);color:var(--muted);cursor:default}
+.btn-outline{width:100%;background:var(--bg3);border:0.5px solid var(--a3);border-radius:var(--rs);color:var(--accent);font-size:13px;font-weight:500;padding:11px;cursor:pointer;font-family:'DM Sans',sans-serif}
+
+.result-card{background:var(--bg2);border:0.5px solid var(--a3);border-radius:var(--r);overflow:hidden}
+.rh{padding:13px 15px;border-bottom:0.5px solid var(--border);display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.rname{font-family:'Cormorant Garamond',serif;font-size:19px;font-weight:500}
+.ren{font-size:11px;color:var(--muted);margin-top:2px}
+.rtags{display:flex;gap:4px;flex-wrap:wrap;margin-top:5px}
+.rtag{font-size:10px;padding:2px 7px;border-radius:7px;background:var(--a2);border:0.5px solid var(--a3);color:var(--accent)}
+.btn-save{background:var(--accent);border:none;border-radius:7px;color:#1a1200;font-size:11px;font-weight:500;padding:6px 11px;cursor:pointer;white-space:nowrap;flex-shrink:0;font-family:'DM Sans',sans-serif}
+.btn-save.saved{background:var(--bg3);border:0.5px solid var(--border);color:var(--muted);cursor:default}
+.rb{padding:13px 15px;display:flex;flex-direction:column;gap:13px}
+.concept-box{font-size:12px;color:#aaa;line-height:1.6;background:var(--bg3);border-radius:7px;padding:9px 11px;border-left:2px solid var(--a3)}
+.note-box{font-size:12px;color:#aaa;line-height:1.6;background:var(--bg3);border-radius:7px;padding:9px 11px;border-left:2px solid var(--a3)}
+.ingr-row2{padding:8px 10px;background:var(--bg3);border-radius:7px;display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:4px}
+.iz{font-size:13px;font-weight:500}
+.ien{font-size:11px;color:var(--muted);margin-top:1px}
+.iamt{color:var(--accent);font-size:12px;font-weight:500;white-space:nowrap}
+.mg2-row{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.mg2-card{background:var(--bg3);border-radius:7px;padding:8px 10px}
+
+.tweak-section{background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--r);overflow:hidden}
+.tweak-hd{padding:10px 13px;border-bottom:0.5px solid var(--border);display:flex;align-items:center;gap:6px}
+.tweak-hd span{font-size:13px;font-weight:500}
+.tweak-hd small{font-size:11px;color:var(--muted)}
+.tweak-bd{padding:10px 13px;display:flex;flex-direction:column;gap:9px}
+.tweak-row{display:flex;flex-direction:column;gap:5px}
+.tweak-lbl{font-size:11px;color:var(--muted)}
+.tweak-btns{display:flex;gap:5px;flex-wrap:wrap}
+.tbtn{font-size:11px;padding:5px 10px;border-radius:7px;border:0.5px solid var(--border);background:var(--bg3);color:var(--muted);cursor:pointer;white-space:nowrap}
+.tbtn.reduce.on{background:#1a0808;border-color:var(--red);color:var(--red)}
+.tbtn.boost.on{background:#081a10;border-color:var(--green);color:var(--green)}
+.tweak-result-box{background:var(--bg3);border-radius:8px;padding:11px;display:flex;flex-direction:column;gap:6px}
+.tweak-tip{display:flex;align-items:flex-start;gap:7px;font-size:12px;line-height:1.5}
+.tip-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0;margin-top:4px}
+.tip-dot.r{background:var(--red)}
+.tip-dot.b{background:var(--green)}
+
+/* modal overlay */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;display:flex;align-items:flex-end;justify-content:center}
+.modal{background:var(--bg2);border-radius:16px 16px 0 0;width:100%;max-width:480px;padding:18px 16px max(20px,env(safe-area-inset-bottom));max-height:90dvh;overflow-y:auto}
+.modal-title{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:500;margin-bottom:14px}
+.field{margin-bottom:11px}
+.field label{font-size:11px;color:var(--muted);display:block;margin-bottom:4px}
+.field input,.field select,.field textarea{width:100%;background:var(--bg3);border:0.5px solid var(--border);border-radius:var(--rs);color:var(--text);padding:9px 11px;font-size:13px;font-family:'DM Sans',sans-serif;outline:none}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--a3)}
+.field textarea{resize:vertical;min-height:64px;line-height:1.5}
+.field-hint{font-size:10px;color:var(--hint);margin-top:3px}
+.modal-btns{display:flex;gap:8px;margin-top:14px}
+.btn-cancel{flex:1;background:var(--bg3);border:0.5px solid var(--border);border-radius:var(--rs);color:var(--muted);padding:11px;cursor:pointer;font-size:13px;font-family:'DM Sans',sans-serif}
+.btn-submit{flex:2;background:var(--accent);border:none;border-radius:var(--rs);color:#1a1200;padding:11px;cursor:pointer;font-size:13px;font-weight:500;font-family:'DM Sans',sans-serif}
+
+/* favourites */
+.fav-list{padding:10px 16px;display:flex;flex-direction:column;gap:8px}
+.fav-section-label{font-size:10px;color:var(--accent);font-weight:500;letter-spacing:1.5px;text-transform:uppercase;margin:6px 0 4px}
+
+/* saved specials */
+.saved-list{display:flex;flex-direction:column;gap:6px}
+.si{background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--rs);padding:10px 12px;display:flex;justify-content:space-between;align-items:center;cursor:pointer}
+.si:active{opacity:.75}
+.si-name{font-size:13px;font-weight:500}
+.si-meta{font-size:11px;color:var(--muted);margin-top:2px}
+
+.coming{padding:48px 16px;text-align:center;color:var(--muted);font-size:13px}
+.coming div{font-size:36px;margin-bottom:10px;opacity:.3}
+.empty{text-align:center;color:var(--muted);font-size:13px;padding:40px 16px}
+.divider{height:0.5px;background:var(--border);margin:4px 0}
+
+/* waiting */
+.waiting-box{padding:28px;text-align:center;color:var(--muted);font-size:13px;background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--r)}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="screen" id="screen"></div>
+  <nav class="botnav" id="botnav">
+    <button class="bnbtn active" data-nav="home">🏠<span>主頁</span></button>
+    <button class="bnbtn" data-nav="cocktails">🍸<span>調酒</span></button>
+    <button class="bnbtn" data-nav="cabinet">🍾<span>酒櫃</span></button>
+    <button class="bnbtn" data-nav="favourites">⭐<span>收藏</span></button>
+    <button class="bnbtn" data-nav="special">✦<span>特調</span></button>
+  </nav>
+</div>
+<div id="modal-root"></div>
+
+<script>
+// ─── DATA ───────────────────────────────────────────────
+let BOTTLES=[
+  // ── 威士忌 ──
+  {id:1,name:'美格波本威士忌',en:"Maker's Mark Bourbon",cat:'威士忌',abv:45,flavor:['香草','焦糖','橡木','甜'],strength:3,img:null},
+  {id:2,name:'泥煤哥 Big Peat',en:'Big Peat Islay Blended Malt 46%',cat:'威士忌',abv:46,flavor:['泥煤','煙燻','碘','海鹽'],strength:5,img:null},
+  {id:3,name:'日本妮卡 Nikka',en:'Nikka From The Barrel 51.4%',cat:'威士忌',abv:51.4,flavor:['果香','麥芽','辛香','木質'],strength:4,img:null},
+  {id:4,name:"Michter's Rye Whiskey",en:"Michter's Rye Whiskey 42.4%",cat:'威士忌',abv:42.4,flavor:['裸麥','辛香','香草','木質'],strength:4,img:null},
+  {id:5,name:'St-Rémy 白蘭地',en:'St-Rémy Double Wood 40%',cat:'白蘭地',abv:40,flavor:['水果','橡木','香草','焦糖'],strength:3,img:null},
+  // ── 琴酒 ──
+  {id:6,name:'Tanqueray London Dry',en:'Tanqueray London Dry Gin 43.1%',cat:'琴酒',abv:43.1,flavor:['杜松子','柑橘','草本'],strength:3,img:null},
+  {id:7,name:'Nordes 西班牙琴酒',en:'Nordés Atlantic Galician Gin 40%',cat:'琴酒',abv:40,flavor:['檸檬馬鞭草','玫瑰','柑橘'],strength:3,img:null},
+  {id:8,name:"Hendrick's Amazonia",en:"Hendrick's Amazonia Gin",cat:'琴酒',abv:43.4,flavor:['黃瓜','玫瑰','接骨木花'],strength:3,img:null},
+  {id:9,name:'賓堡大紅袍烏龍茶琴酒',en:'Pinhook Oolong Tea Gin 51.8%',cat:'琴酒',abv:51.8,flavor:['烏龍茶','花香','草本'],strength:4,img:null},
+  {id:10,name:'KS Dry Gin',en:'KS Dry Gin',cat:'琴酒',abv:40,flavor:['杜松子','草本','柑橘'],strength:3,img:null},
+  // ── 蘭姆酒 ──
+  {id:11,name:'紅茶蘭姆酒',en:'Red Tea Rum (自製)',cat:'蘭姆酒',abv:40,flavor:['紅茶','蜂蜜','木質'],strength:3,img:null},
+  {id:12,name:'羅勒蘭姆酒',en:'Basil Rum (自製)',cat:'蘭姆酒',abv:40,flavor:['羅勒','草本','熱帶水果'],strength:3,img:null},
+  {id:13,name:'可樂傑瑞水手蘭姆',en:'Jerry Water Sailor Rum (自製香料)',cat:'蘭姆酒',abv:40,flavor:['香料','可樂','焦糖'],strength:3,img:null},
+  // ── 伏特加 ──
+  {id:14,name:'美國伏特加',en:'American Vodka',cat:'伏特加',abv:40,flavor:['清淡','穀物'],strength:2,img:null},
+  {id:15,name:'金萱綠茶伏特加',en:'Jin Xuan Green Tea Vodka (自製)',cat:'伏特加',abv:40,flavor:['金萱烏龍','茶香','清甜'],strength:3,img:null},
+  // ── 龍舌蘭 ──
+  {id:16,name:'KS 龍舌蘭 Blanco',en:'KS Tequila Blanco',cat:'龍舌蘭',abv:40,flavor:['龍舌蘭','青草','柑橘'],strength:3,img:null},
+  // ── 利口酒 ──
+  {id:17,name:'MB 接骨木花利口酒',en:'MB Elder Flower 20%',cat:'利口酒',abv:20,flavor:['接骨木花','清甜','花香'],strength:2,img:null},
+  {id:18,name:'MB 茉莉花利口酒',en:'MB Jasmine 30%',cat:'利口酒',abv:30,flavor:['茉莉花','花香','甜'],strength:2,img:null},
+  {id:19,name:'帕萊迪索荔枝利口酒 Dita',en:'Dita Lychee Liqueur',cat:'利口酒',abv:20,flavor:['荔枝','清甜','花香'],strength:2,img:null},
+  {id:20,name:'三得利巨峰紫葡萄利口酒',en:'Suntory Kyoho Grape 16%',cat:'利口酒',abv:16,flavor:['巨峰葡萄','甜','果香'],strength:2,img:null},
+  {id:21,name:'奶奶覆盆莓利口酒',en:"Grandma's Raspberry 18%",cat:'利口酒',abv:18,flavor:['覆盆莓','莓果','甜'],strength:2,img:null},
+  {id:22,name:'富蘭葛利榛果利口酒',en:'Frangelico Hazelnut 20%',cat:'利口酒',abv:20,flavor:['榛果','香草','甜'],strength:2,img:null},
+  {id:23,name:'FAREITI餅乾利口酒',en:'Fareiti Biscotti 28%',cat:'利口酒',abv:28,flavor:['餅乾','香草','堅果'],strength:2,img:null},
+  {id:24,name:'墨萊特水蜜桃利口酒',en:"Merlet Crème de Pêche 18%",cat:'利口酒',abv:18,flavor:['水蜜桃','甜','果香'],strength:2,img:null},
+  {id:25,name:'君度橙酒',en:'Cointreau 40%',cat:'利口酒',abv:40,flavor:['橙皮','柑橘','甜'],strength:3,img:null},
+  {id:26,name:'A&H 金萱烏龍茶利口酒',en:'A&H Jin Xuan Oolong 20%',cat:'利口酒',abv:20,flavor:['金萱烏龍','茶香','清甜'],strength:2,img:null},
+  // ── 苦精/香艾酒 ──
+  {id:27,name:'安格仕苦精',en:'Angostura Bitters 44.7%',cat:'苦精',abv:44.7,flavor:['香料','草本','苦'],strength:5,img:null},
+  {id:28,name:'安格仕柑橘苦精',en:'Angostura Orange Bitters',cat:'苦精',abv:28,flavor:['柑橘','橙皮','苦'],strength:4,img:null},
+  {id:29,name:'LAMOUSS 發泡劑',en:'Lamouss Foaming Agent',cat:'其他',abv:0,flavor:['中性'],strength:1,img:null},
+  {id:30,name:'麗萊 Lillet Blanc',en:'Lillet Blanc 17%',cat:'香艾酒',abv:17,flavor:['柑橘','蜂蜜','花香'],strength:2,img:null},
+  {id:31,name:'Dolin Dry Vermouth',en:'Dolin Dry Vermouth 17.5%',cat:'香艾酒',abv:17.5,flavor:['乾型','草本','礦物'],strength:2,img:null},
+  {id:32,name:'艾碧斯 Fruko',en:'Fruko Absinthe 70%',cat:'其他',abv:70,flavor:['茴香','草本','苦'],strength:5,img:null},
+  {id:33,name:'KS 十年波特酒',en:'KS 10yr Port Wine',cat:'其他',abv:20,flavor:['葡萄乾','甜','木質'],strength:2,img:null},
+  {id:34,name:'Tio Pepe 雪莉酒',en:'Tio Pepe Fino Sherry',cat:'其他',abv:15,flavor:['杏仁','礦物','乾型'],strength:2,img:null},
+  {id:35,name:'NONINO Amaro',en:'Nonino Quintessentia Amaro 35%',cat:'其他',abv:35,flavor:['草本','苦甜','香料'],strength:4,img:null},
+  {id:36,name:'白梅酒',en:'Plum Wine',cat:'其他',abv:14,flavor:['梅子','酸甜','果香'],strength:2,img:null},
+];
+
+let RECIPES=[
+  // ════════ 經典調酒 ════════
+  {id:1,name:'Old Fashioned',name_zh:'古典威士忌',cat:'威士忌',base:'波本美格',desc:'威士忌類經典，酒感強烈，橙皮香氣突出，適合純飲愛好者。',
+   method:{label:'Stir',sub:'Stir 攪拌，保留清澈酒體'},glass:{label:'威杯 Rocks',sub:'大冰，方冰'},
+   ingr:[{zh:'波本美格',en:'Bourbon Whiskey (Maker\'s Mark)',a:'60ml',type:'威士忌',sel:null},{zh:'2:1糖漿',en:'Simple Syrup 2:1',a:'4-5ml',type:null,sel:null},{zh:'柑橘苦精',en:'Orange Bitter',a:'3 drops',type:'苦精',sel:null}],
+   steps:['威杯中放入大冰或方冰','加入2:1糖漿4-5ml','加入柑橘苦精3滴','倒入波本威士忌60ml','輕輕攪拌10-15秒','橙皮扭轉後擦杯緣放入'],
+   garnish:[{item:'橙皮',note:'扭轉後擦杯緣，釋放精油'}],fav:false,img:null},
+
+  {id:2,name:'Negroni',name_zh:'內格羅尼',cat:'琴酒',base:'Gin',desc:'義大利苦甜經典，深紅色澤，層次豐富。',
+   method:{label:'Stir',sub:'攪拌杯加冰攪拌，保留清澈'},glass:{label:'Rocks Glass',sub:'大冰塊或冰球'},
+   ingr:[{zh:'琴酒',en:'Gin',a:'45ml',type:'琴酒',sel:null},{zh:'甜苦艾酒 Vermouth Rosso',en:'Vermouth Rosso',a:'30ml',type:null,sel:null},{zh:'金巴利 Campari',en:'Campari',a:'20ml',type:null,sel:null}],
+   steps:['攪拌杯加冰','倒入琴酒、甜苦艾酒、Campari','攪拌30秒','濾入放有方冰的岩石杯','橙皮裝飾'],
+   garnish:[{item:'橙皮',note:'扭轉橙皮後放入或掛於杯緣'}],fav:false,img:null},
+
+  {id:3,name:'Margarita',name_zh:'瑪格莉特',cat:'龍舌蘭',base:'Tequila',desc:'清爽酸甜，鹽口杯是靈魂，夏天首選。',
+   method:{label:'Shake',sub:'三節式或波士頓，大力搖盪'},glass:{label:'Coupe / Margarita',sub:'碟型杯，杯緣沾鹽'},
+   ingr:[{zh:'龍舌蘭 Tequila',en:'Tequila',a:'50ml',type:'龍舌蘭',sel:null},{zh:'君度橙酒 Cointreau',en:'Cointreau',a:'20ml',type:'利口酒',sel:null},{zh:'萊姆汁 Lime juice',en:'Lime juice',a:'20ml',type:null,sel:null}],
+   steps:['杯緣沾鹽備用','雪克杯加冰','倒入所有材料','大力搖盪10-15秒','細濾入鹽口杯'],
+   garnish:[{item:'萊姆皮',note:'掛於杯緣，呼應酸度'}],fav:false,img:null},
+
+  {id:4,name:'Vesper',name_zh:'薇絲朋',cat:'琴酒',base:'Gin + Vodka',desc:'James Bond 經典，三合一基酒，複雜迷人。',
+   method:{label:'Shake',sub:'Shake，保留清澈感'},glass:{label:'馬丁尼杯 / 雞尾酒杯',sub:'無冰'},
+   ingr:[{zh:'Nordes 琴酒',en:'Nordés Gin',a:'45ml',type:'琴酒',sel:null},{zh:'伏特加 Vodka',en:'Vodka',a:'15ml',type:'伏特加',sel:null},{zh:'麗萊 Lillet Blanc',en:'Lillet Blanc',a:'15ml',type:'香艾酒',sel:null}],
+   steps:['雪克杯加冰','倒入琴酒、伏特加、麗萊','用力搖盪','細濾入冰鎮馬丁尼杯','檸檬皮扭轉裝飾'],
+   garnish:[{item:'檸檬皮',note:'扭轉擦杯緣後放入'}],fav:false,img:null},
+
+  {id:5,name:'Penicillin',name_zh:'盤尼西林',cat:'威士忌',base:'Blended Scotch + Islay Peated',desc:'現代經典，薑汁蜂蜜搭配泥煤漂浮，層次感十足。',
+   method:{label:'Shake',sub:'搖盪後細濾，泥煤最後漂浮'},glass:{label:'威杯 Rocks',sub:'大方冰讓層次更明顯'},
+   ingr:[{zh:'Blended Scotch 調和蘇格蘭威士忌',en:'Blended Scotch Whiskey',a:'45ml',type:'威士忌',sel:null},{zh:'Amaro Nonino',en:'Amaro Nonino',a:'10ml',type:null,sel:null},{zh:'艾碧斯 Absinthe',en:'Absinthe',a:'5ml',type:null,sel:null},{zh:'檸檬汁',en:'Lemon juice',a:'20ml',type:null,sel:null},{zh:'百里香薑糖漿',en:'Thyme Ginger Syrup',a:'15ml',type:null,sel:null},{zh:'薑片',en:'Ginger slices',a:'1片',type:null,sel:null},{zh:'泥煤哥 Big Peat（漂浮）',en:'Big Peat Islay Whisky (float)',a:'15ml',type:'威士忌',sel:null}],
+   steps:['雪克杯加入薑片','加入蘇格蘭威士忌、Amaro Nonino、艾碧斯、檸檬汁、薑糖漿','加冰大力搖盪','細濾入放有大方冰的威杯','湯匙背面讓泥煤威士忌漂浮於頂層'],
+   garnish:[{item:'檸檬皮',note:'扭轉後放入，與泥煤香形成對比'}],fav:false,img:null},
+
+  {id:6,name:'Long Island Iced Tea',name_zh:'長島冰茶',cat:'多基酒',base:'Gin + Vodka + Tequila + Rum + Brandy',desc:'招牌多烈酒調酒，後勁強。',
+   method:{label:'Shake',sub:'Shake後倒入'},glass:{label:'Highball',sub:'長冰'},
+   ingr:[{zh:'琴酒',en:'Gin',a:'20ml',type:'琴酒',sel:null},{zh:'迷迭香伏特加（自製）',en:'Rosemary Vodka',a:'15ml',type:'伏特加',sel:null},{zh:'龍舌蘭',en:'Tequila Blanco',a:'10ml',type:'龍舌蘭',sel:null},{zh:'香料可樂蘭姆酒（自製）',en:'Spiced Cola Rum',a:'20ml',type:'蘭姆酒',sel:null},{zh:'St-Rémy 白蘭地',en:'St-Rémy Brandy',a:'15ml',type:'白蘭地',sel:null},{zh:'君度橙酒',en:'Cointreau',a:'20ml',type:'利口酒',sel:null},{zh:'金萱烏龍茶利口酒',en:'A&H Jin Xuan Oolong',a:'20ml',type:'利口酒',sel:null},{zh:'檸檬汁',en:'Lemon juice',a:'15ml',type:null,sel:null},{zh:'香料可樂糖漿（自製）',en:'Spiced Cola Syrup',a:'10ml',type:null,sel:null},{zh:'2:1糖漿',en:'Simple Syrup',a:'10ml',type:null,sel:null}],
+   steps:['雪克杯加冰','倒入所有材料搖盪','倒入放有長冰的Highball杯'],
+   garnish:[{item:'檸檬皮',note:'掛於杯緣'}],fav:false,img:null},
+
+  {id:7,name:'French 75 法式75',name_zh:'法式75',cat:'琴酒',base:'Nordés Gin',desc:'花香、茶香，酒感適中，以香檳補滿。',
+   method:{label:'Shake',sub:'先Shake再倒入香檳杯加香檳'},glass:{label:'香檳杯',sub:'無冰'},
+   ingr:[{zh:'Nordes 琴酒',en:'Nordés Gin',a:'50ml',type:'琴酒',sel:null},{zh:'接骨木花利口酒',en:'MB Elder Flower',a:'10ml',type:'利口酒',sel:null},{zh:'檸檬汁',en:'Lemon juice',a:'20ml',type:null,sel:null},{zh:'2:1糖漿',en:'Simple Syrup',a:'10ml',type:null,sel:null},{zh:'香檳 Champagne',en:'Champagne',a:'60ml',type:null,sel:null}],
+   steps:['除香檳外所有材料加冰搖盪','細濾入香檳杯','緩緩補入香檳60ml','檸檬皮裝飾'],
+   garnish:[{item:'檸檬皮',note:'扭轉後放入或掛杯緣'}],fav:false,img:null},
+
+  {id:8,name:'Manhattan',name_zh:'曼哈頓',cat:'威士忌',base:'Rye Whiskey',desc:'威士忌愛好者的經典，辛辣帶甜，橙皮收尾。',
+   method:{label:'Stir',sub:'攪拌杯攪拌'},glass:{label:'馬丁尼杯 / 雞尾酒杯',sub:'方冰'},
+   ingr:[{zh:'裸麥威士忌 Rye Whiskey',en:'Rye Whiskey',a:'60ml',type:'威士忌',sel:null},{zh:'甜苦艾酒 Vermouth Rosso',en:'Vermouth Rosso',a:'15ml',type:null,sel:null},{zh:'柑橘苦精',en:'Orange Bitters',a:'1 dash',type:'苦精',sel:null}],
+   steps:['攪拌杯加冰','倒入所有材料','攪拌充分冷卻','濾入雞尾酒杯','橙皮裝飾'],
+   garnish:[{item:'橙皮',note:'扭轉後放入'}],fav:false,img:null},
+
+  {id:9,name:'Mojito',name_zh:'莫吉托',cat:'蘭姆酒',base:'White Rum',desc:'清新薄荷萊姆，需要綿冰，沒有碎冰不出。',
+   method:{label:'Build',sub:'直接在杯中建構'},glass:{label:'Highball / Collins',sub:'綿冰'},
+   ingr:[{zh:'白蘭姆酒 White Rum',en:'White Rum',a:'60ml',type:'蘭姆酒',sel:null},{zh:'萊姆角',en:'Lime wedge',a:'4顆',type:null,sel:null},{zh:'薄荷葉',en:'Mint leaves',a:'15片',type:null,sel:null},{zh:'萊姆汁',en:'Lime juice',a:'15ml',type:null,sel:null},{zh:'2:1糖漿',en:'Simple Syrup',a:'15ml',type:null,sel:null},{zh:'蘇打水',en:'Soda water',a:'30ml',type:null,sel:null}],
+   steps:['杯中放入萊姆角和薄荷葉','輕輕搗壓（不要搗碎薄荷）','加入萊姆汁、糖漿、白蘭姆酒','填入綿冰','補入蘇打水','薄荷葉和萊姆角裝飾'],
+   garnish:[{item:'薄荷葉',note:'拍打後插入'},{item:'萊姆角',note:'放於杯緣'}],fav:false,img:null},
+
+  {id:10,name:'Daiquiri 戴奇莉',name_zh:'戴克利',cat:'蘭姆酒',base:'White Rum',desc:'清爽酸甜，蘭姆酒最純粹的表現。',
+   method:{label:'Shake',sub:'三節式大力搖盪'},glass:{label:'馬丁尼杯 / 雞尾酒杯',sub:'無冰'},
+   ingr:[{zh:'白蘭姆酒',en:'White Rum',a:'50ml',type:'蘭姆酒',sel:null},{zh:'萊姆汁',en:'Lime juice',a:'20ml',type:null,sel:null},{zh:'糖漿',en:'Sugar syrup',a:'10ml',type:null,sel:null}],
+   steps:['雪克杯加冰','倒入所有材料','大力搖盪','細濾入冰鎮雞尾酒杯','萊姆皮裝飾'],
+   garnish:[{item:'萊姆皮',note:'扭轉後掛於杯緣'}],fav:false,img:null},
+
+  {id:11,name:'New York Sour',name_zh:'紐約酸酒',cat:'威士忌',base:'Bourbon',desc:'波本搖盪後頂上紅酒漂浮，視覺層次驚豔。',
+   method:{label:'Shake',sub:'先Shake再漂浮紅酒'},glass:{label:'威杯 Rocks',sub:'大冰'},
+   ingr:[{zh:'波本威士忌 Bourbon',en:'Bourbon',a:'50ml',type:'威士忌',sel:null},{zh:'檸檬汁',en:'Lemon juice',a:'20ml',type:null,sel:null},{zh:'2:1糖漿',en:'Simple Syrup',a:'10ml',type:null,sel:null},{zh:'紅酒（漂浮）',en:'Red Wine (float)',a:'30ml',type:null,sel:null}],
+   steps:['波本、檸檬汁、糖漿加冰搖盪','濾入放有大冰的威杯','量好紅酒','以barspoon抵住杯緣緩慢倒入紅酒漂浮'],
+   garnish:[{item:'橙皮',note:'可選'}],fav:false,img:null},
+
+  {id:12,name:'Sidecar',name_zh:'側車',cat:'白蘭地',base:'Cognac / Brandy',desc:'白蘭地加君度，酸甜均衡的經典。',
+   method:{label:'Shake',sub:'三節式搖盪'},glass:{label:'馬丁尼杯 / 雞尾酒杯',sub:'無冰'},
+   ingr:[{zh:'白蘭地 Cognac',en:'Cognac / Brandy',a:'30ml',type:'白蘭地',sel:null},{zh:'Calvados 蘋果白蘭地',en:'Calvados Apple Brandy',a:'20ml',type:null,sel:null},{zh:'君度橙酒 Cointreau',en:'Cointreau',a:'20ml',type:'利口酒',sel:null},{zh:'檸檬汁',en:'Lemon juice',a:'20ml',type:null,sel:null},{zh:'柑橘苦精',en:'Orange Bitters',a:'3 drops',type:'苦精',sel:null},{zh:'鹽水',en:'Salt water',a:'3 drops',type:null,sel:null},{zh:'LAMOUSS',en:'Lamouss',a:'3 drops',type:null,sel:null}],
+   steps:['雪克杯加冰','倒入所有材料','大力搖盪','細濾入冰鎮雞尾酒杯','檸檬皮裝飾'],
+   garnish:[{item:'檸檬皮',note:'扭轉後放入'}],fav:false,img:null},
+
+  {id:13,name:'White Lady',name_zh:'白色佳人',cat:'琴酒',base:'Gin',desc:'清爽花香，琴酒加君度的優雅組合。',
+   method:{label:'Shake',sub:'三節式搖盪'},glass:{label:'馬丁尼杯 / 雞尾酒杯',sub:'無冰'},
+   ingr:[{zh:'琴酒 Gin',en:'Gin',a:'50ml',type:'琴酒',sel:null},{zh:'君度橙酒 Cointreau',en:'Cointreau',a:'20ml',type:'利口酒',sel:null},{zh:'檸檬汁',en:'Lemon juice',a:'20ml',type:null,sel:null}],
+   steps:['雪克杯加冰','倒入所有材料','大力搖盪','細濾入冰鎮雞尾酒杯'],
+   garnish:[{item:'檸檬皮',note:'可選'}],fav:false,img:null},
+
+  // ════════ 創調 ════════
+  {id:14,name:'陳美鳳',cat:'菜單調酒',base:'紅茶蘭姆酒',desc:'茶香果香調。2/4酸甜、1/4苦澀、1/4想讓妳醉，紅茶蜜香渾厚，鳳梨果香裹著梅酒酸意。像極了美鳳姐，在戲劇裡總笑對滄桑，把人生的無奈演得真切，也活得燦爛。向客人介紹：我們自己做的紅茶伏特加配上梅酒與鳳梨，酒體比較厚實，尾韻為苦，整體是酸甜偏甜的。',
+   method:{label:'Shake',sub:'PM90 + LJ15，搖盪'},glass:{label:'威杯',sub:'大方冰'},
+   ingr:[{zh:'紅茶蘭姆酒（自製）',en:'Red Tea Rum',a:'45ml',type:'蘭姆酒',sel:null},{zh:'梅酒',en:'Plum Wine',a:'10ml',type:null,sel:null},{zh:'澄清鳳梨糖漿',en:'Clear Pineapple Syrup',a:'18ml',type:null,sel:null},{zh:'巨峰紫利口酒',en:'Suntory Kyoho Grape',a:'10ml',type:'利口酒',sel:null},{zh:'檸檬汁（不得加入PM內）',en:'Lemon juice',a:'15ml',type:null,sel:null},{zh:'Dolin Dry Vermouth',en:'Dolin Dry',a:'5ml',type:'香艾酒',sel:null},{zh:'格蘭菲迪12年',en:'Glenfiddich 12yr',a:'5ml',type:'威士忌',sel:null},{zh:'安格仕苦精',en:'Angostura Bitters',a:'2 drops',type:'苦精',sel:null},{zh:'鹽水',en:'Salty water',a:'1 drop',type:null,sel:null}],
+   steps:['除檸檬汁外材料先調製成PM85','加冰加檸檬汁15ml搖盪','細濾入放有大方冰的威杯'],
+   garnish:[{item:'1顆脆梅',note:'放入杯中'},{item:'鳳梨乾',note:'掛於杯緣'}],fav:false,img:null},
+
+  {id:15,name:'鄧荔君',cat:'菜單調酒',base:'茉莉綠茶琴酒',desc:'花香、果香調。2/4甜、1/4酸、1/4想讓妳戀，茉莉花香清雅，荔枝果甜交疊綠茶清新，尾韻微苦。向客人介紹：是茉莉綠茶跟荔枝的搭配，酸甜偏酸，上面有一層我們自己做的荔枝奶蓋。',
+   method:{label:'Stir',sub:'PM95，攪拌'},glass:{label:'冰美式杯',sub:'小方冰'},
+   ingr:[{zh:'茉莉綠茶琴酒',en:'Jasmine Green Tea London Dry Gin',a:'30ml',type:'琴酒',sel:null},{zh:'金萱（暫時）',en:'Jin Xuan',a:'15ml',type:null,sel:null},{zh:'荔枝利口酒 Dita',en:'Dita Lychee Liqueur',a:'15ml',type:'利口酒',sel:null},{zh:'MB茉莉利口酒',en:'MB Jasmine',a:'15ml',type:'利口酒',sel:null},{zh:'Tio Pepe',en:'Tio Pepe',a:'5ml',type:null,sel:null},{zh:'檸檬酸',en:'Citric acid',a:'15ml',type:null,sel:null},{zh:'荔枝糖漿',en:'Lychee syrup',a:'15ml',type:null,sel:null},{zh:'水',en:'Water',a:'15g',type:null,sel:null}],
+   steps:['所有材料加冰攪拌至PM95','濾入放有小方冰的冰美式杯','在頂部擠兩圈荔枝奶蓋','插一朵食用花'],
+   garnish:[{item:'荔枝奶蓋',note:'擠兩圈'},{item:'食用花',note:'插一朵'}],fav:false,img:null},
+
+  {id:16,name:'蔡琴',cat:'菜單調酒',base:'羅勒蘭姆酒',desc:'草本、泰式、果香調。2/4酸、1/4甜、1/4想讓妳醒，草本清爽、微酸迴盪，羅勒與香蕉的意外相遇。向客人介紹：羅勒、草本植物跟香蕉的搭配，酸甜比較平衡，但要注意後勁比較強喔。',
+   method:{label:'Shake',sub:'PM80，搖盪'},glass:{label:'高腳杯',sub:'無冰'},
+   ingr:[{zh:'羅勒蘭姆酒（自製）',en:'Basil Rum',a:'45ml',type:'蘭姆酒',sel:null},{zh:'香蕉糖漿',en:'Banana syrup',a:'15ml',type:null,sel:null},{zh:'檸檬酸',en:'Citric acid',a:'20ml',type:null,sel:null},{zh:'艾碧斯',en:'Absinthe',a:'1ml',type:null,sel:null},{zh:'安格仕苦精',en:'Angostura Bitters',a:'4 drops',type:'苦精',sel:null},{zh:'食鹽水',en:'Salt water',a:'1 drop',type:null,sel:null}],
+   steps:['所有材料加冰搖盪PM80','細濾入高腳杯'],
+   garnish:[{item:'香蕉乾',note:'灑糖炙燒'},{item:'迷迭香碎',note:'撒上'}],fav:false,img:null},
+
+  {id:17,name:'張曼玉',cat:'菜單調酒',base:'黑茶黑醋栗琴酒',desc:'焙火味、果香、植物。2/4優雅、1/4冷豔、1/4不經意的俏皮。以重烘培烏龍茶與深色莓果搭配，加入自製蔓越莓薄荷糖漿解膩，整體酸甜平衡，尾韻微微苦澀。向客人介紹：以重烘培烏龍茶與深色莓果搭配，加入自製蔓越莓薄荷糖漿解膩，整體酸甜平衡，尾韻微微苦澀。',
+   method:{label:'Shake',sub:'PM90 + LAMOUSS 5滴，需搖出厚泡沫'},glass:{label:'高腳杯 / 寬口杯',sub:'無冰'},
+   ingr:[{zh:'黑茶黑醋栗琴酒',en:'Black Tea Blackcurrant Gin',a:'30ml',type:'琴酒',sel:null},{zh:'伏特加',en:'Vodka',a:'15ml',type:'伏特加',sel:null},{zh:'蔓越莓薄荷糖漿',en:'Cranberry Mint Syrup',a:'15ml',type:null,sel:null},{zh:'桑椹原汁',en:'Mulberry juice',a:'10ml',type:null,sel:null},{zh:'檸檬酸',en:'Citric acid',a:'12ml',type:null,sel:null},{zh:'安格仕苦精',en:'Angostura Bitters',a:'5 drops',type:'苦精',sel:null},{zh:'LAMOUSS',en:'Lamouss',a:'5 drops',type:null,sel:null}],
+   steps:['所有材料加冰搖盪至產生厚泡沫','細濾入高腳杯','放上食用花'],
+   garnish:[{item:'食用花',note:'放於泡沫上方'}],fav:false,img:null},
+
+  {id:18,name:'王菲',cat:'菜單調酒',base:'Nordes 琴酒',desc:'花香、果香調。王菲是使用西班牙琴酒帶檸檬馬鞍草香氣，配上覆盆莓及接骨木，還有玫瑰，是花香調性的一款調酒，也要注意後勁比較強。出酒前噴玫瑰水，上中下各噴一下。',
+   method:{label:'Stir',sub:'PM105，攪拌'},glass:{label:'高腳杯',sub:'無冰'},
+   ingr:[{zh:'Nordes 琴酒',en:'Nordés Gin',a:'45ml',type:'琴酒',sel:null},{zh:'奶奶覆盆莓利口酒',en:"Grandma's Raspberry",a:'15ml',type:'利口酒',sel:null},{zh:'接骨木利口酒',en:'MB Elder Flower',a:'15ml',type:'利口酒',sel:null},{zh:'麗萊 Lillet Blanc',en:'Lillet Blanc',a:'10ml',type:'香艾酒',sel:null},{zh:'檸檬酸',en:'Citric acid',a:'20ml',type:null,sel:null},{zh:'2:1糖漿',en:'Simple Syrup',a:'10ml',type:null,sel:null}],
+   steps:['所有材料加冰攪拌PM105','細濾入高腳杯','出杯前噴玫瑰水，上中下各一下'],
+   garnish:[{item:'白玫瑰永生花',note:'放於杯緣'},{item:'薄荷葉',note:'可選'}],fav:false,img:null},
+
+  {id:19,name:'萬芳',cat:'菜單調酒',base:'玫瑰天竺葵水果鼠尾草琴酒',desc:'草本、茶香、果香。草本植物搭配熱帶風味，是植物果香與氣泡的搭配，整體清爽，酒感偏淡。',
+   method:{label:'Build',sub:'PM120，直接在杯中建構'},glass:{label:'小 Highball',sub:'長冰'},
+   ingr:[{zh:'玫瑰天竺葵水果鼠尾草琴酒',en:'Rose Geranium Fruit Sage Gin',a:'25ml',type:'琴酒',sel:null},{zh:'Nordes 琴酒',en:'Nordés Gin',a:'10ml',type:'琴酒',sel:null},{zh:'金萱烏龍伏特加（自製）',en:'Jin Xuan Oolong Vodka',a:'15ml',type:'伏特加',sel:null},{zh:'澄清百香果迷迭香糖漿',en:'Clear Passion Fruit Rosemary Syrup',a:'20ml',type:null,sel:null},{zh:'檸檬酸',en:'Citric acid',a:'10ml',type:null,sel:null},{zh:'澄清芭樂汁',en:'Clear Guava juice',a:'10ml',type:null,sel:null},{zh:'Dolin Dry Vermouth',en:'Dolin Dry',a:'10ml',type:'香艾酒',sel:null}],
+   steps:['杯中放入長冰','依序加入所有材料Build','最後灌CO2一顆'],
+   garnish:[{item:'萬芳PM泡泡',note:'頂部裝飾'}],fav:false,img:null},
+
+  // ════════ 特調 ════════
+  {id:20,name:'烏龍茶接骨木（茶香酒重酸甜偏甜）',cat:'特調',base:'賓堡大紅袍烏龍茶琴酒',desc:'茶香、酒重、酸甜偏甜。',
+   method:{label:'Shake',sub:'Shake'},glass:{label:'高腳杯',sub:'無冰'},
+   ingr:[{zh:'賓堡大紅袍烏龍茶琴酒',en:'Pinhook Oolong Tea Gin',a:'45ml',type:'琴酒',sel:null},{zh:'麗萊 Lillet Blanc',en:'Lillet Blanc',a:'10ml',type:'香艾酒',sel:null},{zh:'接骨木利口酒',en:'MB Elder Flower',a:'15ml',type:'利口酒',sel:null},{zh:'檸檬酸',en:'Citric acid',a:'10ml',type:null,sel:null},{zh:'2:1糖漿',en:'Simple Syrup',a:'10ml',type:null,sel:null},{zh:'澄清鳳梨糖漿',en:'Clear Pineapple Syrup',a:'5ml',type:null,sel:null},{zh:'食鹽水',en:'Salt water',a:'3 drops',type:null,sel:null},{zh:'柑橘苦精',en:'Orange Bitter',a:'3 drops',type:'苦精',sel:null}],
+   steps:['所有材料加冰搖盪','細濾入高腳杯','放食用花裝飾'],
+   garnish:[{item:'食用花',note:'放於杯緣'}],fav:false,img:null},
+
+  {id:21,name:'蔡琴PM特調（清爽草本偏酸）',cat:'特調',base:'菜琴PM',desc:'特調 - 清爽、草本、偏酸（蔡琴TWIST）。',
+   method:{label:'Stir',sub:'Stir'},glass:{label:'威杯',sub:'大方冰'},
+   ingr:[{zh:'菜琴PM',en:'Caiqin PM',a:'70ml',type:null,sel:null},{zh:'接骨木利口酒',en:'MB Elder Flower',a:'15ml',type:'利口酒',sel:null},{zh:'檸檬汁',en:'Lemon juice',a:'10ml',type:null,sel:null}],
+   steps:['所有材料加大方冰攪拌','濾入威杯','放食用花裝飾'],
+   garnish:[{item:'食用花',note:''}],fav:false,img:null},
+
+  {id:22,name:'琴酒葡萄紅酒',cat:'特調',base:"亨利爵士 Hendrick's",desc:'琴酒、葡萄、紅酒，Shake。',
+   method:{label:'Shake',sub:'Shake'},glass:{label:'威杯',sub:'大方冰'},
+   ingr:[{zh:"亨利爵士 Hendrick's Amazonia",en:"Hendrick's Amazonia Gin",a:'45ml',type:'琴酒',sel:null},{zh:'巨峰紫利口酒',en:'Suntory Kyoho Grape',a:'15ml',type:'利口酒',sel:null},{zh:'波特酒',en:'Port Wine',a:'10ml',type:null,sel:null},{zh:'檸檬汁',en:'Lemon juice',a:'15ml',type:null,sel:null},{zh:'食鹽水',en:'Salt water',a:'3 drops',type:null,sel:null}],
+   steps:['所有材料加大方冰搖盪','細濾入威杯'],
+   garnish:[],fav:false,img:null},
+
+  {id:23,name:'法式75改版（花香茶香）',cat:'特調',base:'Nordes 琴酒',desc:'花香、茶香，酒感適中。',
+   method:{label:'Shake',sub:'Shake'},glass:{label:'威杯',sub:'大方冰'},
+   ingr:[{zh:'Nordes 琴酒',en:'Nordés Gin',a:'40ml',type:'琴酒',sel:null},{zh:'接骨木利口酒',en:'MB Elder Flower',a:'15ml',type:'利口酒',sel:null},{zh:'A&H金萱烏龍茶利口酒',en:'A&H Jin Xuan Oolong',a:'15ml',type:'利口酒',sel:null},{zh:'檸檬汁',en:'Lemon juice',a:'15ml',type:null,sel:null},{zh:'2:1糖漿',en:'Simple Syrup',a:'10ml',type:null,sel:null},{zh:'Merlet 水蜜桃利口酒',en:'Merlet Crème de Pêche',a:'5ml',type:'利口酒',sel:null},{zh:'柑橘苦精',en:'Orange Bitter',a:'5 drops',type:'苦精',sel:null}],
+   steps:['所有材料加大方冰搖盪','細濾入威杯'],
+   garnish:[],fav:false,img:null},
+
+  {id:24,name:'百香芭樂綠茶（果香茶香酒感重）',cat:'特調',base:'萬芳PM',desc:'百香果、芭樂、綠茶，果香、茶香，酒感重。',
+   method:{label:'Shake',sub:'Shake'},glass:{label:'威杯',sub:'大方冰'},
+   ingr:[{zh:'萬芳PM',en:'Wanfang PM',a:'30ml',type:null,sel:null},{zh:'自製金萱烏龍伏特加',en:'Jin Xuan Oolong Vodka',a:'30ml',type:'伏特加',sel:null},{zh:'A&H金萱烏龍茶利口酒',en:'A&H Jin Xuan Oolong',a:'15ml',type:'利口酒',sel:null},{zh:'迷迭香糖漿',en:'Rosemary syrup',a:'20ml',type:null,sel:null},{zh:'檸檬汁',en:'Lemon juice',a:'20ml',type:null,sel:null}],
+   steps:['所有材料加大方冰搖盪','細濾入威杯'],
+   garnish:[],fav:false,img:null},
+
+  {id:25,name:'焦糖榛果奶酒（可熱飲）',cat:'特調',base:'燕麥奶 + 紅茶',desc:'焦糖榛果奶酒，可做熱飲（調好後微波40秒）。灑可可粉裝飾。',
+   method:{label:'Shake',sub:'Shake'},glass:{label:'威杯',sub:'大方冰'},
+   ingr:[{zh:'燕麥奶',en:'Oat milk',a:'90ml',type:null,sel:null},{zh:'艸木里祖傳配方紅茶',en:'House Special Red Tea',a:'30ml',type:null,sel:null},{zh:'富蘭葛利榛果利口酒',en:'Frangelico',a:'15ml',type:'利口酒',sel:null},{zh:'FAREITI餅乾利口酒',en:'Fareiti Biscotti',a:'15ml',type:'利口酒',sel:null},{zh:'2:1糖漿',en:'Simple Syrup',a:'10ml',type:null,sel:null}],
+   steps:['所有材料加大方冰搖盪','細濾入威杯','撒可可粉','如需熱飲，調好後微波40秒再撒可可粉'],
+   garnish:[{item:'可可粉',note:'撒上'}],fav:false,img:null},
+
+  {id:26,name:'香料紅酒（可熱飲）',cat:'特調',base:'紅酒 + 香料蘭姆酒',desc:'香料紅酒，可做熱飲（調好後微波40秒）。搭配5片蘋果片裝飾。',
+   method:{label:'Build',sub:'Build'},glass:{label:'冰美式杯',sub:'小方冰'},
+   ingr:[{zh:'紅酒',en:'Red Wine',a:'50ml',type:null,sel:null},{zh:'自製香料蘭姆酒',en:'Spiced Rum',a:'15ml',type:'蘭姆酒',sel:null},{zh:'自製香料糖漿',en:'Spiced Syrup',a:'5ml',type:null,sel:null},{zh:'澄清鳳梨糖漿',en:'Clear Pineapple Syrup',a:'10ml',type:null,sel:null},{zh:'澄清百香果糖漿',en:'Clear Passion Fruit Syrup',a:'10ml',type:null,sel:null},{zh:'檸檬汁',en:'Lemon juice',a:'15ml',type:null,sel:null},{zh:'柳橙片',en:'Orange slices',a:'0.5顆（5片）',type:null,sel:null},{zh:'蘋果片',en:'Apple slices',a:'0.5顆（5片）',type:null,sel:null}],
+   steps:['杯中放小方冰','依序加入所有材料Build','如需熱飲，調好後微波40秒'],
+   garnish:[{item:'蘋果片5片',note:'剖半切5片裝飾'}],fav:false,img:null},
+
+  {id:27,name:'觀音媽的洗腳水',cat:'特調',base:'陳美鳳PM + 蔡琴PM',desc:'陳梅鳳PM與菜琴PM的混搭特調。食用花+蘋果片裝飾。',
+   method:{label:'Build',sub:'Build'},glass:{label:'冰美式杯',sub:'小方冰'},
+   ingr:[{zh:'陳美鳳PM',en:'Chen Meifeng PM',a:'45ml',type:null,sel:null},{zh:'蔡琴PM',en:'Caiqin PM',a:'15ml',type:null,sel:null},{zh:'澄清百香果糖漿',en:'Clear Passion Fruit Syrup',a:'10ml',type:null,sel:null},{zh:'自製金萱烏龍伏特加',en:'Jin Xuan Oolong Vodka',a:'10ml',type:'伏特加',sel:null},{zh:'Dolin Dry Vermouth',en:'Dolin Dry',a:'10ml',type:'香艾酒',sel:null},{zh:'檸檬汁',en:'Lemon juice',a:'15ml',type:null,sel:null}],
+   steps:['杯中放小方冰','依序加入所有材料Build'],
+   garnish:[{item:'食用花',note:''},{item:'蘋果片',note:''}],fav:false,img:null},
+
+  {id:28,name:'Espresso Martini 咖啡馬丁尼',cat:'特調',base:'伏特加',desc:'咖啡與伏特加的完美結合，三節式shake。',
+   method:{label:'Shake',sub:'三節式搖盪'},glass:{label:'馬丁尼杯 / 雞尾酒杯',sub:'無冰'},
+   ingr:[{zh:'伏特加',en:'Vodka',a:'30ml',type:'伏特加',sel:null},{zh:'自製咖啡伏特加',en:'Coffee Vodka',a:'15ml',type:'伏特加',sel:null},{zh:'萬芳PM',en:'Wanfang PM',a:'20ml',type:null,sel:null},{zh:'百香果糖漿',en:'Passion Fruit Syrup',a:'5ml',type:null,sel:null},{zh:'檸檬酸',en:'Citric acid',a:'5ml',type:null,sel:null},{zh:'淺中焙濃縮咖啡',en:'Light-Medium Roast Espresso',a:'1份（約15-20ml）',type:null,sel:null}],
+   steps:['所有材料加冰三節式搖盪','細濾入冰鎮雞尾酒杯'],
+   garnish:[{item:'咖啡豆',note:'放三顆於泡沫上'}],fav:false,img:null},
+
+  {id:29,name:'西西里咖啡',cat:'無酒精',base:'藝伎咖啡 + 艸木里檸檬',desc:'冰咖啡加艸木里梅爾檸檬汁與黑糖蜜，裝入Highball杯，放檸檬片裝飾。',
+   method:{label:'Shake',sub:'奶泡機攪打20秒'},glass:{label:'Highball',sub:'冰塊'},
+   ingr:[{zh:'淺培藝伎咖啡粉',en:'Geisha Coffee Powder (light roast)',a:'15g',type:null,sel:null},{zh:'冰塊',en:'Ice',a:'80g',type:null,sel:null},{zh:'水',en:'Water',a:'100g',type:null,sel:null},{zh:'艸木里梅爾檸檬汁',en:'Caomuli Meyer Lemon Juice',a:'15ml',type:null,sel:null},{zh:'艸木里黑糖蜜',en:'Caomuli Brown Sugar Molasses',a:'20ml',type:null,sel:null}],
+   steps:['開咖啡機，咖啡盛裝器盛裝14克藝伎咖啡粉','上咖啡機按2，盛裝出濃縮液','裝進可攪打的量杯','加入冰塊80g、水100g、艸木里檸檬汁15ml、艸木里黑糖蜜20ml','上奶泡機攪打20秒','裝入Highball杯','放艸木里檸檬片裝飾'],
+   garnish:[{item:'艸木里檸檬片',note:'放入杯中'}],fav:false,img:null},
+
+  // 附件四：經典調酒補充
+  {id:30,name:'Alaska',name_zh:'阿拉斯加',cat:'琴酒',base:'Gin',desc:'琴酒搭配夏翠絲黃酒的經典隱藏版馬丁尼變化。',
+   method:{label:'Stir',sub:'攪拌杯攪拌'},glass:{label:'馬丁尼杯',sub:'無冰'},
+   ingr:[{zh:'琴酒',en:'Gin',a:'60ml',type:'琴酒',sel:null},{zh:'夏翠絲黃酒',en:'Chartreuse Yellow',a:'15ml',type:null,sel:null},{zh:'柑橘苦精',en:'Orange bitters',a:'2 dash',type:'苦精',sel:null}],
+   steps:['攪拌杯加冰','倒入所有材料','攪拌至充分冷卻','濾入馬丁尼杯'],
+   garnish:[{item:'黃檸檬皮',note:'扭轉後放入'}],fav:false,img:null},
+
+  {id:31,name:'Americano',name_zh:'美國佬',cat:'香艾酒',base:'Vermouth Rosso',desc:'氣泡爽口的開胃酒經典，直調法快速完成。',
+   method:{label:'Build',sub:'直調法：直接在杯裡直調'},glass:{label:'Highball',sub:'長冰'},
+   ingr:[{zh:'Mancino Vermouth Rosso',en:'Mancino Vermouth Rosso',a:'45ml',type:'香艾酒',sel:null},{zh:'金巴利 Campari',en:'Campari',a:'45ml',type:null,sel:null},{zh:'鹽水',en:'Salty water',a:'2 dash',type:null,sel:null},{zh:'安格仕苦精',en:'Angostura Bitters',a:'3 dash',type:'苦精',sel:null},{zh:'蘇打水',en:'Soda water',a:'60ml',type:null,sel:null}],
+   steps:['Highball杯加滿長冰','依序倒入Vermouth Rosso、Campari、鹽水、安格仕苦精','補入蘇打水60ml','輕攪一下'],
+   garnish:[{item:'柳橙皮',note:'放於杯緣'}],fav:false,img:null},
+
+  {id:32,name:'Around The World',name_zh:'環遊世界',cat:'琴酒',base:'Gin',desc:'鳳梨汁加薄荷利口酒，熱帶南洋風。波士頓雪克杯製作。',
+   method:{label:'Shake',sub:'波士頓雪克杯搖盪'},glass:{label:'威杯',sub:'大冰'},
+   ingr:[{zh:'琴酒',en:'Gin',a:'50ml',type:'琴酒',sel:null},{zh:'鳳梨汁',en:'Pineapple juice',a:'60ml',type:null,sel:null},{zh:'MB薄荷利口酒',en:'MB Mint Liqueur',a:'15ml',type:null,sel:null},{zh:'檸檬汁',en:'Lemon Juice',a:'15ml',type:null,sel:null},{zh:'2:1糖漿',en:'Simple Syrup',a:'15ml',type:null,sel:null}],
+   steps:['波士頓雪克杯加冰','倒入所有材料搖盪','濾入放有大冰的威杯'],
+   garnish:[{item:'薄荷葉',note:'放於杯口'},{item:'鳳梨乾',note:'掛於杯緣'}],fav:false,img:null},
+
+  {id:33,name:'Aviation 飛行',name_zh:'飛行',cat:'琴酒',base:'Nordés',desc:'紫羅蘭利口酒帶出夢幻紫色，花香經典。三節式搖盪。',
+   method:{label:'Shake',sub:'三節式shake杯'},glass:{label:'雞尾酒杯',sub:'無冰'},
+   ingr:[{zh:'Nordes 琴酒',en:'Nordés Gin',a:'45ml',type:'琴酒',sel:null},{zh:'檸檬汁',en:'Lemon juice',a:'20ml',type:null,sel:null},{zh:'Luxardo Maraschino',en:'Luxardo Maraschino',a:'15ml',type:null,sel:null},{zh:'紫羅蘭苦精',en:'Crème de Violette Bitter',a:'10ml',type:'苦精',sel:null},{zh:'鹽水',en:'Salty water',a:'3 dash',type:null,sel:null}],
+   steps:['三節式雪克杯加冰','倒入所有材料搖盪','細濾入雞尾酒杯'],
+   garnish:[{item:'食用花',note:'放於液面'}],fav:false,img:null},
+
+  {id:34,name:'Bamboo',name_zh:'竹子',cat:'其他',base:'Fino Sherry',desc:'雪莉酒為底的低酒精經典，礦物與堅果風味。',
+   method:{label:'Stir',sub:'攪拌杯攪拌'},glass:{label:'馬丁尼杯',sub:'無冰'},
+   ingr:[{zh:'Tio Pepe Fino雪莉酒',en:'Fino Sherry (Tio Pepe)',a:'45ml',type:'其他',sel:null},{zh:'Dolin Dry Vermouth',en:'Vermouth Dry (Dolin)',a:'20ml',type:'香艾酒',sel:null},{zh:'Noilly Prat Dry Vermouth',en:'Vermouth Dry (Noilly Prat)',a:'15ml',type:null,sel:null},{zh:'柑橘苦精',en:'Orange Bitter',a:'2 dash',type:'苦精',sel:null},{zh:'鹽水',en:'Salty water',a:'2 dash',type:null,sel:null}],
+   steps:['攪拌杯加冰','倒入所有材料','攪拌至充分冷卻','濾入馬丁尼杯'],
+   garnish:[{item:'檸檬皮',note:'扭轉後放入'}],fav:false,img:null},
+
+  {id:35,name:"Bee's Knees 蜂膝",name_zh:'蜂膝',cat:'琴酒',base:'Gin (Roku)',desc:'楓糖漿帶出蜂蜜般的香甜，琴酒酸甜經典。客人沒指定琴酒就拿Roku。',
+   method:{label:'Shake',sub:'三節式shake杯'},glass:{label:'雞尾酒杯',sub:'無冰'},
+   ingr:[{zh:'琴酒（客人沒指定就拿Roku）',en:'Gin (Roku default)',a:'50ml',type:'琴酒',sel:null},{zh:'檸檬汁',en:'Lemon juice',a:'20ml',type:null,sel:null},{zh:'楓糖漿',en:'Maple syrup',a:'15ml',type:null,sel:null},{zh:'柑橘苦精',en:'Orange bitter',a:'2 dash',type:'苦精',sel:null},{zh:'鹽水',en:'Salty water',a:'2 dash',type:null,sel:null}],
+   steps:['三節式雪克杯加冰','倒入所有材料搖盪','細濾入雞尾酒杯'],
+   garnish:[{item:'檸檬皮',note:'扭轉後放入'}],fav:false,img:null},
+
+  {id:36,name:'Boulevardier 花花公子',name_zh:'花花公子',cat:'威士忌',base:'Bourbon',desc:'波本版的Negroni，酒感更醇厚。',
+   method:{label:'Stir',sub:'攪拌杯攪拌'},glass:{label:'威杯',sub:'大冰'},
+   ingr:[{zh:'波本威士忌',en:'Bourbon',a:'45ml',type:'威士忌',sel:null},{zh:'Vermouth Rosso',en:'Vermouth Rosso',a:'30ml',type:null,sel:null},{zh:'金巴利 Campari',en:'Campari',a:'20ml',type:null,sel:null},{zh:'鹽水',en:'Salty water',a:'2 dash',type:null,sel:null},{zh:'安格仕苦精',en:'Angostura Bitters',a:'3 dash',type:'苦精',sel:null}],
+   steps:['攪拌杯加大冰','倒入所有材料','攪拌至充分冷卻','濾入放有大冰的威杯'],
+   garnish:[{item:'橙皮',note:'扭轉後放入'}],fav:false,img:null},
+
+  {id:37,name:'Bramble',name_zh:'黑莓',cat:'琴酒',base:'Gin',desc:'黑醋栗利口酒最後淋上，視覺如荊棘藤蔓。注意黑醋栗利口酒不要加進雪克杯，先用jigger量好，最後淋在酒跟冰塊上面。',
+   method:{label:'Shake',sub:'黑醋栗利口酒最後淋上，不進雪克杯'},glass:{label:'威杯',sub:'大冰'},
+   ingr:[{zh:'琴酒',en:'Gin',a:'50ml',type:'琴酒',sel:null},{zh:'檸檬汁',en:'Lemon juice',a:'20ml',type:null,sel:null},{zh:'2:1糖漿',en:'Simple Syrup',a:'15ml',type:null,sel:null},{zh:'黑醋栗利口酒 Crème de Cassis',en:'Crème de Cassis',a:'25ml',type:null,sel:null}],
+   steps:['雪克杯加冰，加入琴酒、檸檬汁、糖漿搖盪','濾入放有大冰的威杯','用jigger量好黑醋栗利口酒','最後緩緩淋在酒跟冰塊上面，形成漸層'],
+   garnish:[{item:'檸檬乾',note:'放於杯緣'}],fav:false,img:null},
+
+  {id:38,name:'Balalaika',name_zh:'巴拉萊卡',cat:'伏特加',base:'Vodka',desc:'伏特加版的Sidecar，清爽明亮。',
+   method:{label:'Shake',sub:'三節式shake杯'},glass:{label:'雞尾酒杯',sub:'無冰'},
+   ingr:[{zh:'伏特加',en:'Vodka',a:'45ml',type:'伏特加',sel:null},{zh:'檸檬汁',en:'Lemon juice',a:'20ml',type:null,sel:null},{zh:'君度橙酒',en:'Cointreau',a:'20ml',type:'利口酒',sel:null}],
+   steps:['三節式雪克杯加冰','倒入所有材料搖盪','細濾入雞尾酒杯'],
+   garnish:[{item:'檸檬皮',note:'扭轉後放入'}],fav:false,img:null},
+
+  {id:39,name:'Between The Sheets',name_zh:'床單之間',cat:'白蘭地',base:'Brandy',desc:'白蘭地、蘋果白蘭地、白蘭姆三種基酒交織的經典。',
+   method:{label:'Shake',sub:'三節式shake杯'},glass:{label:'雞尾酒杯',sub:'無冰'},
+   ingr:[{zh:'白蘭地',en:'Brandy',a:'30ml',type:'白蘭地',sel:null},{zh:'Calvados蘋果白蘭地',en:'Calvados',a:'15ml',type:null,sel:null},{zh:'白蘭姆酒',en:'White Rum',a:'20ml',type:'蘭姆酒',sel:null},{zh:'君度橙酒',en:'Cointreau',a:'20ml',type:'利口酒',sel:null},{zh:'檸檬汁',en:'Lemon juice',a:'20ml',type:null,sel:null}],
+   steps:['三節式雪克杯加冰','倒入所有材料搖盪','細濾入雞尾酒杯'],
+   garnish:[{item:'橙皮',note:'扭轉後放入'}],fav:false,img:null},
+
+  {id:40,name:'Old Pal',name_zh:'老夥伴',cat:'威士忌',base:"Michter's Rye",desc:'Negroni家族的裸麥威士忌變化版，更乾爽。',
+   method:{label:'Stir',sub:'攪拌杯攪拌'},glass:{label:'雞尾酒杯',sub:'無冰'},
+   ingr:[{zh:"Michter's裸麥威士忌",en:"Michter's Rye Whiskey",a:'45ml',type:'威士忌',sel:null},{zh:'Dolin Dry Vermouth',en:'Vermouth Dry',a:'30ml',type:'香艾酒',sel:null},{zh:'金巴利 Campari',en:'Campari',a:'20ml',type:null,sel:null}],
+   steps:['攪拌杯加冰','倒入所有材料','攪拌至充分冷卻','濾入雞尾酒杯'],
+   garnish:[{item:'食用花',note:'放於杯緣'}],fav:false,img:null},
+
+  {id:41,name:'Vieux Carré 老廣場',name_zh:'老廣場',cat:'多基酒',base:'Brandy + Rye + Vermouth',desc:'紐奧良經典，白蘭地、裸麥威士忌、甜苦艾酒三方平衡，D.O.M.提味。',
+   method:{label:'Stir',sub:'攪拌杯攪拌'},glass:{label:'雞尾酒杯',sub:'大冰'},
+   ingr:[{zh:'白蘭地',en:'Brandy',a:'20ml',type:'白蘭地',sel:null},{zh:"Michter's裸麥威士忌",en:"Michter's Rye Whiskey",a:'20ml',type:'威士忌',sel:null},{zh:'Vermouth Rosso',en:'Vermouth Rosso',a:'20ml',type:null,sel:null},{zh:'安格仕苦精',en:'Angostura Bitters',a:'2 dash',type:'苦精',sel:null},{zh:"Peychaud's苦精",en:"Peychaud's Bitters",a:'2 dash',type:null,sel:null},{zh:'D.O.M.班尼狄克丁',en:'D.O.M. Bénédictine',a:'5ml',type:null,sel:null}],
+   steps:['攪拌杯加大冰','倒入所有材料','攪拌至充分冷卻','濾入放有大冰的雞尾酒杯'],
+   garnish:[],fav:false,img:null},
+
+  {id:42,name:'Southside',name_zh:'南方',cat:'琴酒',base:'Gin',desc:'琴酒版的Mojito，薄荷清新無氣泡。',
+   method:{label:'Shake',sub:'搖盪'},glass:{label:'雞尾酒杯',sub:'無冰'},
+   ingr:[{zh:'琴酒',en:'Gin',a:'45ml',type:'琴酒',sel:null},{zh:'檸檬汁',en:'Lemon juice',a:'20ml',type:null,sel:null},{zh:'2:1糖漿',en:'Simple Syrup',a:'15ml',type:null,sel:null},{zh:'薄荷葉',en:'Mint leaves',a:'1把',type:null,sel:null}],
+   steps:['雪克杯中放入薄荷葉輕拍','加冰、琴酒、檸檬汁、糖漿','大力搖盪','細濾入雞尾酒杯'],
+   garnish:[],fav:false,img:null},
+
+  {id:43,name:'一般馬丁尼',name_zh:'一般馬丁尼',cat:'琴酒',base:'Gin',desc:'經典馬丁尼比例，琴酒與苦艾酒3:1。',
+   method:{label:'Stir',sub:'攪拌杯攪拌'},glass:{label:'馬丁尼杯',sub:'無冰'},
+   ingr:[{zh:'琴酒',en:'Gin',a:'60ml',type:'琴酒',sel:null},{zh:'Dry Vermouth',en:'Vermouth Dry',a:'20ml',type:'香艾酒',sel:null},{zh:'鹽水',en:'Salty water',a:'2 dash',type:null,sel:null}],
+   steps:['攪拌杯加冰','倒入所有材料','攪拌至充分冷卻','濾入馬丁尼杯'],
+   garnish:[{item:'檸檬皮',note:'扭轉後放入'}],fav:false,img:null},
+
+  {id:44,name:'Dry 馬丁尼',name_zh:'Dry馬丁尼',cat:'琴酒',base:'Gin',desc:'比例更乾，苦艾酒減少，琴酒風味更突出。',
+   method:{label:'Stir',sub:'攪拌杯攪拌'},glass:{label:'馬丁尼杯',sub:'無冰'},
+   ingr:[{zh:'琴酒',en:'Gin',a:'50ml',type:'琴酒',sel:null},{zh:'Dry Vermouth',en:'Vermouth Dry',a:'15ml',type:'香艾酒',sel:null},{zh:'鹽水',en:'Salty water',a:'2 dash',type:null,sel:null}],
+   steps:['攪拌杯加冰','倒入所有材料','攪拌至充分冷卻','濾入馬丁尼杯'],
+   garnish:[{item:'檸檬皮',note:'扭轉後放入'}],fav:false,img:null},
+
+  {id:45,name:'Extra Dry 馬丁尼',name_zh:'Extra Dry馬丁尼',cat:'琴酒',base:'Gin',desc:'極乾馬丁尼，苦艾酒僅用於潤杯。',
+   method:{label:'Stir',sub:'苦艾酒潤杯後倒掉，攪拌琴酒'},glass:{label:'馬丁尼杯',sub:'無冰'},
+   ingr:[{zh:'琴酒',en:'Gin',a:'50ml',type:'琴酒',sel:null},{zh:'Dry Vermouth（潤杯用）',en:'Vermouth Dry (for rinsing)',a:'10ml',type:'香艾酒',sel:null},{zh:'鹽水',en:'Salty water',a:'2 dash',type:null,sel:null}],
+   steps:['用Dry Vermouth潤杯後倒掉多餘液體','攪拌杯加冰倒入琴酒與鹽水攪拌','濾入潤過杯的馬丁尼杯'],
+   garnish:[{item:'檸檬皮',note:'扭轉後放入'}],fav:false,img:null},
+
+  {id:46,name:'Gin Tonic',name_zh:'琴通寧',cat:'琴酒',base:'Gin (Roku)',desc:'琴通寧加一點金巴利的變化版，客人沒指定琴酒就拿Roku。',
+   method:{label:'Build',sub:'直接在杯裡直調'},glass:{label:'Highball',sub:'長冰'},
+   ingr:[{zh:'琴酒（客人沒指定就拿Roku）',en:'Gin (Roku default)',a:'45ml',type:'琴酒',sel:null},{zh:'金巴利 Campari',en:'Campari',a:'5ml',type:null,sel:null},{zh:'通寧水 Tonic Water',en:'Tonic Water',a:'加滿',type:null,sel:null}],
+   steps:['Highball杯加滿長冰','倒入琴酒、金巴利','補滿通寧水','輕攪一下'],
+   garnish:[],fav:false,img:null},
+
+  {id:47,name:'Gin Fizz',name_zh:'琴費士',cat:'琴酒',base:'Gin (Roku)',desc:'氣泡感十足的琴酒經典，三節式搖盪後補蘇打水。',
+   method:{label:'Shake',sub:'三節式shake後補蘇打水'},glass:{label:'Highball',sub:'長冰'},
+   ingr:[{zh:'琴酒（客人沒指定就拿Roku）',en:'Gin (Roku default)',a:'50ml',type:'琴酒',sel:null},{zh:'檸檬汁',en:'Lemon juice',a:'20ml',type:null,sel:null},{zh:'2:1糖漿',en:'Simple Syrup',a:'15ml',type:null,sel:null},{zh:'蘇打水',en:'Soda water',a:'90ml',type:null,sel:null},{zh:'鹽水',en:'Salty water',a:'2 dash',type:null,sel:null}],
+   steps:['三節式雪克杯加冰，倒入琴酒、檸檬汁、糖漿、鹽水搖盪','濾入放有長冰的Highball杯','補滿蘇打水90ml'],
+   garnish:[{item:'黃檸檬皮或食用花',note:'放於杯緣'}],fav:false,img:null},
+
+  {id:48,name:'Gimlet 琴蕾',name_zh:'琴蕾',cat:'琴酒',base:'Gin',desc:'琴酒與萊姆汁的純粹經典，簡單卻雋永。',
+   method:{label:'Shake',sub:'三節式shake杯'},glass:{label:'雞尾酒杯',sub:'無冰'},
+   ingr:[{zh:'琴酒',en:'Gin',a:'45ml',type:'琴酒',sel:null},{zh:'萊姆汁（拿檸檬汁替代）',en:'Lime juice (Lemon juice substitute)',a:'15ml',type:null,sel:null},{zh:'2:1糖漿',en:'Simple Syrup',a:'10ml',type:null,sel:null},{zh:'鹽水',en:'Salty water',a:'2 dash',type:null,sel:null}],
+   steps:['三節式雪克杯加冰','倒入所有材料搖盪','細濾入雞尾酒杯'],
+   garnish:[{item:'黃檸檬皮',note:'扭轉後放入'}],fav:false,img:null},
+
+  {id:49,name:'Last Word',name_zh:'最後一句話',cat:'琴酒',base:'Gin',desc:'四種材料等比例的禁酒令時期經典，草本與滻桃酒交織。',
+   method:{label:'Shake',sub:'三節式shake杯'},glass:{label:'雞尾酒杯',sub:'無冰'},
+   ingr:[{zh:'琴酒',en:'Gin',a:'30ml',type:'琴酒',sel:null},{zh:'萊姆汁（拿檸檬汁替代）',en:'Lime juice (Lemon juice substitute)',a:'20ml',type:null,sel:null},{zh:'夏翠絲綠酒',en:'Chartreuse Green',a:'20ml',type:null,sel:null},{zh:'Luxardo Maraschino',en:'Luxardo Maraschino',a:'15ml',type:null,sel:null},{zh:'艾碧斯',en:'Absinthe',a:'1 barspoon',type:null,sel:null},{zh:'柑橘苦精',en:'Orange bitters',a:'2 dash',type:'苦精',sel:null},{zh:'鹽水',en:'Salty water',a:'2 dash',type:null,sel:null}],
+   steps:['三節式雪克杯加冰','倒入所有材料搖盪','細濾入雞尾酒杯'],
+   garnish:[{item:'黃檸檬皮',note:'扭轉後放入'}],fav:false,img:null},
+
+  {id:50,name:'Sloe Gin Fizz',name_zh:'黑刺李琴費士',cat:'琴酒',base:'Sloe Gin',desc:'黑刺李琴酒版的Fizz，帶有梅果甜香。',
+   method:{label:'Shake',sub:'搖盪後補蘇打水'},glass:{label:'Highball',sub:'長冰'},
+   ingr:[{zh:'海曼黑刺李琴酒 Sloe Gin',en:"Hayman's Sloe Gin",a:'50ml',type:null,sel:null},{zh:'檸檬汁',en:'Lemon juice',a:'20ml',type:null,sel:null},{zh:'2:1糖漿',en:'Simple Syrup',a:'10ml',type:null,sel:null},{zh:'蘇打水',en:'Soda water',a:'加滿',type:null,sel:null}],
+   steps:['雪克杯加冰，倒入黑刺李琴酒、檸檬汁、糖漿搖盪','濾入放有長冰的Highball杯','補滿蘇打水'],
+   garnish:[{item:'橙皮',note:'放於杯緣'}],fav:false,img:null},
+
+  {id:51,name:'Paper Plane',name_zh:'紙飛機',cat:'威士忌',base:'Bourbon',desc:'波本、Aperol、Amaro Nonino、檸檬汁等比例調和，現代經典。',
+   method:{label:'Shake',sub:'三節式shake杯'},glass:{label:'雞尾酒杯',sub:'無冰'},
+   ingr:[{zh:'波本威士忌',en:'Bourbon',a:'20ml',type:'威士忌',sel:null},{zh:'Aperol',en:'Aperol',a:'20ml',type:null,sel:null},{zh:'Amaro Nonino',en:'Amaro Nonino Quintessentia',a:'20ml',type:null,sel:null},{zh:'檸檬汁',en:'Lemon juice',a:'20ml',type:null,sel:null}],
+   steps:['三節式雪克杯加冰','倒入所有材料搖盪','細濾入雞尾酒杯'],
+   garnish:[{item:'檸檬皮',note:'可選'}],fav:false,img:null},
+
+  // 附件三：特調補充
+  {id:52,name:'威士忌果香茶香（酸甜平衡）',cat:'特調',base:'萬芳PM + 美格波本',desc:'威士忌、果香、茶香，酒感適中，酸甜平衡。可加安丘辣椒增加層次。',
+   method:{label:'Stir',sub:'攪拌'},glass:{label:'威杯',sub:'大方冰'},
+   ingr:[{zh:'萬芳PM',en:'Wanfang PM',a:'30ml',type:null,sel:null},{zh:'美格波本',en:"Maker's Mark Bourbon",a:'15ml',type:'威士忌',sel:null},{zh:'Nordes 琴酒',en:'Nordés Gin',a:'15ml',type:'琴酒',sel:null},{zh:'金萱烏龍伏特加（自製）',en:'Jin Xuan Oolong Vodka',a:'15ml',type:'伏特加',sel:null},{zh:'百香果糖漿',en:'Passion Fruit Syrup',a:'15ml',type:null,sel:null},{zh:'檸檬酸',en:'Citric acid',a:'10ml',type:null,sel:null},{zh:'安丘辣椒（可選）',en:'Ancho Chili (optional)',a:'5ml',type:null,sel:null}],
+   steps:['攪拌杯加大方冰','依序倒入所有材料','攪拌至充分冷卻','濾入威杯'],
+   garnish:[{item:'檸檬乾',note:'放於杯緣'}],fav:false,img:null},
+
+  {id:53,name:'草本（Roku版，酸甜平衡）',cat:'特調',base:'萬芳PM + Roku',desc:'草本，酒感適中，酸甜平衡。',
+   method:{label:'Stir',sub:'攪拌'},glass:{label:'威杯',sub:'大方冰'},
+   ingr:[{zh:'萬芳PM',en:'Wanfang PM',a:'30ml',type:null,sel:null},{zh:'Roku 琴酒',en:'Roku Gin',a:'30ml',type:'琴酒',sel:null},{zh:'玫瑰鼠尾草糖漿',en:'Rose Sage Syrup',a:'20ml',type:null,sel:null},{zh:'金萱烏龍伏特加（自製）',en:'Jin Xuan Oolong Vodka',a:'10ml',type:'伏特加',sel:null},{zh:'Tio Pepe',en:'Tio Pepe',a:'15ml',type:'其他',sel:null},{zh:'檸檬酸',en:'Citric acid',a:'10ml',type:null,sel:null}],
+   steps:['攪拌杯加大方冰','依序倒入所有材料','攪拌至充分冷卻','濾入威杯'],
+   garnish:[{item:'檸檬乾',note:'放於杯緣'}],fav:false,img:null},
+
+  {id:54,name:'花香草本（酸甜平衡）',cat:'特調',base:'萬芳PM + Nordes',desc:'花香、草本，酒感適中，酸甜平衡。',
+   method:{label:'Stir',sub:'攪拌'},glass:{label:'威杯',sub:'大方冰'},
+   ingr:[{zh:'萬芳PM',en:'Wanfang PM',a:'20ml',type:null,sel:null},{zh:'Nordes 琴酒',en:'Nordés Gin',a:'30ml',type:'琴酒',sel:null},{zh:'紫羅蘭利口酒',en:'Crème de Violette',a:'10ml',type:null,sel:null},{zh:'玫瑰鼠尾草糖漿',en:'Rose Sage Syrup',a:'20ml',type:null,sel:null},{zh:'Tio Pepe',en:'Tio Pepe',a:'15ml',type:'其他',sel:null},{zh:'檸檬酸',en:'Citric acid',a:'10ml',type:null,sel:null},{zh:'艾碧斯',en:'Absinthe',a:'5ml',type:null,sel:null}],
+   steps:['攪拌杯加大方冰','依序倒入所有材料','攪拌至充分冷卻','濾入威杯'],
+   garnish:[{item:'檸檬乾',note:'放於杯緣'}],fav:false,img:null},
+
+  {id:55,name:'龍舌蘭草本（酸甜平衡）',cat:'特調',base:'蔡琴PM + 龍舌蘭',desc:'龍舌蘭、草本，酒感適中，酸甜平衡。',
+   method:{label:'Shake',sub:'搖盪'},glass:{label:'威杯',sub:'大方冰'},
+   ingr:[{zh:'蔡琴PM',en:'Caiqin PM',a:'30ml',type:null,sel:null},{zh:'龍舌蘭',en:'Tequila',a:'30ml',type:'龍舌蘭',sel:null},{zh:'甜椒糖漿',en:'Bell Pepper Syrup',a:'20ml',type:null,sel:null},{zh:'Nordes 琴酒',en:'Nordés Gin',a:'15ml',type:'琴酒',sel:null},{zh:'Tio Pepe',en:'Tio Pepe',a:'15ml',type:'其他',sel:null},{zh:'檸檬酸',en:'Citric acid',a:'15ml',type:null,sel:null},{zh:'艾碧斯',en:'Absinthe',a:'5ml',type:null,sel:null}],
+   steps:['雪克杯加大方冰','依序倒入所有材料搖盪','濾入放有大方冰的威杯'],
+   garnish:[{item:'檸檬乾',note:'放於杯緣'}],fav:false,img:null},
+
+  {id:56,name:'果香酸甜平衡（Gordon莓果版）',cat:'特調',base:'陳梅鳳PM + 莓果',desc:'果香、酸甜平衡、酒感適中。',
+   method:{label:'Stir',sub:'攪拌'},glass:{label:'冰美式杯',sub:'小方冰'},
+   ingr:[{zh:"Gordon's莓果琴酒",en:"Gordon's Berry Gin",a:'50ml',type:'琴酒',sel:null},{zh:'蔡琴PM',en:'Caiqin PM',a:'10ml',type:null,sel:null},{zh:'水蜜桃利口酒',en:'Peach Liqueur',a:'10ml',type:'利口酒',sel:null},{zh:"奶奶覆盆莓利口酒",en:"Grandma's Raspberry",a:'10ml',type:'利口酒',sel:null},{zh:'百香果糖漿',en:'Passion Fruit Syrup',a:'10ml',type:null,sel:null},{zh:'檸檬酸',en:'Citric acid',a:'15ml',type:null,sel:null},{zh:'水',en:'Water',a:'15ml',type:null,sel:null}],
+   steps:['攪拌杯加小方冰','依序倒入所有材料','攪拌至充分冷卻','濾入冰美式杯'],
+   garnish:[{item:'食用花',note:'放於杯緣'}],fav:false,img:null},
+];
+
+let MOCKTAILS=[
+  {id:201,name:'熱可可燕麥奶',cat:'飲品',desc:'用可提娜黑巧克粉製作，售價 NT$195。',
+   ingr:[{item:'巧克力粉（含玉米澱粉2.5克）',amt:'25g'},{item:'燕麥奶',amt:'120g'},{item:'熱水（70-80度）',amt:'120g'},{item:'2:1糖漿',amt:'10ml'}],
+   steps:['熱水壺煮熱水，約70~80度','量杯盛裝25克巧克力粉，倒入熱水120ml','另一量杯裝燕麥奶120ml，微波加熱1分鐘','將兩者混合','奶泡機混打確認均勻','盛裝進杯具'],
+   pairing:'',fav:false,img:null},
+  {id:202,name:'冰可可燕麥奶',cat:'飲品',desc:'用可提娜黑巧克粉製作，售價 NT$195。',
+   ingr:[{item:'巧克力粉（含玉米澱粉2.5克）',amt:'25g'},{item:'燕麥奶',amt:'120g'},{item:'熱水（70-80度）',amt:'80g'},{item:'2:1糖漿',amt:'10ml'},{item:'冰塊',amt:'幾顆'}],
+   steps:['熱水壺煮熱水，約70~80度','量杯盛裝25克巧克力粉，倒入熱水80ml','倒入燕麥奶120ml，加幾顆冰塊','奶泡機混打確認均勻','盛裝進杯具'],
+   pairing:'',fav:false,img:null},
+  {id:203,name:'熱美式',cat:'咖啡',desc:'淺培藝伎咖啡粉，售價 NT$195。',
+   ingr:[{item:'淺培藝伎咖啡粉',amt:'14g'},{item:'80度以上熱水',amt:'280ml'}],
+   steps:['開咖啡機、熱水壺煮熱水約70~80度','咖啡盛裝器盛裝14克藝伎咖啡粉','上咖啡機按2，盛裝出濃縮液','裝進杯具','倒入熱水約280ml（加滿）'],
+   pairing:'',fav:false,img:null},
+  {id:204,name:'冰美式',cat:'咖啡',desc:'淺培藝伎咖啡粉，售價 NT$195。',
+   ingr:[{item:'淺培藝伎咖啡粉',amt:'14g'},{item:'冰塊加水',amt:'220g'}],
+   steps:['開咖啡機','咖啡盛裝器盛裝14克藝伎咖啡粉，上咖啡機按2，盛裝出濃縮液','裝進可攪打的量杯','加入冰塊及水共220克','上奶泡機攪打，有奶泡後即可裝進杯具'],
+   pairing:'',fav:false,img:null},
+  {id:205,name:'冰拿鐵',cat:'咖啡',desc:'月光女神深培咖啡粉，售價 NT$195。',
+   ingr:[{item:'月光女神深培咖啡粉',amt:'15g'},{item:'燕麥奶',amt:'200ml'},{item:'冰塊',amt:'約三塊'}],
+   steps:['開咖啡機','咖啡盛裝器盛裝15克月光女神咖啡粉，上咖啡機按1','裝進可攪打的量杯','加入冰的或常溫燕麥奶200ml','加約三塊冰塊','上奶泡機攪打，有奶泡後即可裝進杯具'],
+   pairing:'',fav:false,img:null},
+  {id:206,name:'熱拿鐵',cat:'咖啡',desc:'月光女神深培咖啡粉，售價 NT$195。',
+   ingr:[{item:'月光女神深培咖啡粉',amt:'15g'},{item:'燕麥奶',amt:'200ml'}],
+   steps:['開咖啡機','咖啡盛裝器盛裝15克月光女神咖啡粉，上咖啡機按1，盛裝出濃縮液','裝進可進微波爐的量杯','加入燕麥奶200ml','上奶泡機攪打','微波爐微波1分鐘','裝進杯具'],
+   pairing:'',fav:false,img:null},
+  {id:207,name:'西西里咖啡',cat:'咖啡',desc:'加入艸木里梅爾檸檬汁與黑糖蜜，清新酸甜，售價 NT$195。',
+   ingr:[{item:'淺培藝伎咖啡粉',amt:'15g'},{item:'冰塊',amt:'80g'},{item:'水',amt:'100g'},{item:'艸木里梅爾檸檬汁',amt:'15ml'},{item:'艸木里黑糖蜜',amt:'20ml'}],
+   steps:['開咖啡機，咖啡盛裝器盛裝14克藝伎咖啡粉，上咖啡機按2，盛裝出濃縮液','裝進可攪打的量杯','加入冰塊80g、水100g、艸木里梅爾檸檬汁15ml、艸木里黑糖蜜20ml','上奶泡機攪打20秒','裝入Highball杯','放艸木里檸檬片裝飾'],
+   pairing:'',fav:false,img:null},
+  {id:208,name:'草莓冰美式',cat:'咖啡',desc:'濃縮咖啡加艸木里草莓糖漿，1顆新鮮草莓裝飾，售價 NT$195。',
+   ingr:[{item:'淺培藝伎咖啡粉',amt:'15g'},{item:'冰塊',amt:'80g'},{item:'水',amt:'100g'},{item:'艸木里梅爾檸檬汁',amt:'10ml'},{item:'艸木里自製草莓糖漿',amt:'30ml'}],
+   steps:['開咖啡機，盛裝14克藝伎咖啡粉，上咖啡機按2，盛裝出濃縮液','裝進可攪打的量杯','加入冰塊80g、水100g、檸檬汁10ml、草莓糖漿30ml','上奶泡機攪打','裝入Highball杯','放1顆新鮮草莓裝飾'],
+   pairing:'',fav:false,img:null},
+  {id:209,name:'草莓奶昔',cat:'奶昔',desc:'售價 NT$300。',
+   ingr:[{item:'草莓果泥',amt:'90ml'},{item:'椰奶',amt:'20ml'},{item:'燕麥奶',amt:'120ml'},{item:'艸木里自製草莓糖漿',amt:'30ml'}],
+   steps:['所有材料加入果汁機','打勻後倒入杯具'],
+   pairing:'',fav:false,img:null},
+  {id:210,name:'無酒精特調（依當日食材現調）',cat:'無酒精特調',desc:'最多使用葡萄柚、柳橙、桑椹、蔓越莓薄荷、百香果、迷迭香、柚子等糖漿或果汁搭配，Build或Shake，售價 NT$300。',
+   ingr:[{item:'葡萄柚汁（視當日）',amt:'1顆 起'},{item:'柳橙汁（視當日）',amt:'1顆 起'},{item:'糖漿（迷迭香/百香果/蔓越莓/鳳梨蘋果等）',amt:'15~20ml'},{item:'蘇打水或伯爵茶',amt:'加滿'},{item:'Acid 酸液或檸檬汁',amt:'5~15ml'}],
+   steps:['依客人喜好選擇A、B、C材料','Build直接入杯或Shake搖盪','最後補充氣泡水或茶加滿'],
+   pairing:'',fav:false,img:null},
+];
+
+const MOCKTAIL_FORMULAS=[
+  {id:1,a:{n:'葡萄柚汁',amt:'1',u:'顆'},b:{n:'柳橙汁',amt:'1',u:'顆'},c:{n:'迷迭香糖漿',amt:'20',u:'ml'},acid:{type:'acid',amt:'5',u:'ml'},fill:{n:'',amt:'',u:''},method:'build'},
+  {id:2,a:{n:'葡萄柚汁',amt:'1',u:'顆'},b:{n:'柳橙汁',amt:'1',u:'顆'},c:{n:'百香果糖漿',amt:'20',u:'ml'},acid:{type:'acid',amt:'5',u:'ml'},fill:{n:'',amt:'',u:''},method:'build'},
+  {id:3,a:{n:'葡萄柚汁',amt:'1',u:'顆'},b:{n:'柳橙汁',amt:'1',u:'顆'},c:{n:'鳳梨蘋果糖漿',amt:'20',u:'ml'},acid:{type:'acid',amt:'5',u:'ml'},fill:{n:'',amt:'',u:''},method:'build'},
+  {id:4,a:{n:'葡萄柚汁',amt:'1',u:'顆'},b:{n:'柳橙汁',amt:'1',u:'顆'},c:{n:'蔓越莓糖漿',amt:'20',u:'ml'},acid:{type:'acid',amt:'5',u:'ml'},fill:{n:'',amt:'',u:''},method:'build'},
+  {id:5,a:{n:'葡萄柚汁',amt:'1',u:'顆'},b:{n:'柳橙汁',amt:'1',u:'顆'},c:{n:'蘇打水',amt:'加滿',u:'ml'},acid:{type:'-',amt:'0',u:'ml'},fill:{n:'2:1糖漿',amt:'15',u:'ml'},method:'build'},
+  {id:6,a:{n:'葡萄柚汁',amt:'1',u:'顆'},b:{n:'迷迭香糖漿',amt:'15',u:'ml'},c:{n:'百香果糖漿',amt:'15',u:'ml'},acid:{type:'acid',amt:'5',u:'ml'},fill:{n:'',amt:'',u:''},method:'build'},
+  {id:7,a:{n:'葡萄柚汁',amt:'1',u:'顆'},b:{n:'迷迭香糖漿',amt:'20',u:'ml'},c:{n:'鳳梨蘋果糖漿',amt:'15',u:'ml'},acid:{type:'acid',amt:'5',u:'ml'},fill:{n:'',amt:'',u:''},method:'build'},
+  {id:8,a:{n:'葡萄柚汁',amt:'1',u:'顆'},b:{n:'迷迭香糖漿',amt:'20',u:'ml'},c:{n:'蘇打水',amt:'加滿',u:'ml'},acid:{type:'lemon',amt:'10',u:'ml'},fill:{n:'',amt:'',u:''},method:'build'},
+  {id:9,a:{n:'葡萄柚汁',amt:'1',u:'顆'},b:{n:'百香果糖漿',amt:'15',u:'ml'},c:{n:'鳳梨蘋果糖漿',amt:'15',u:'ml'},acid:{type:'acid',amt:'5',u:'ml'},fill:{n:'',amt:'',u:''},method:'build'},
+  {id:10,a:{n:'葡萄柚汁',amt:'1',u:'顆'},b:{n:'百香果糖漿',amt:'15',u:'ml'},c:{n:'蔓越莓糖漿',amt:'15',u:'ml'},acid:{type:'acid',amt:'5',u:'ml'},fill:{n:'',amt:'',u:''},method:'build'},
+  {id:11,a:{n:'葡萄柚汁',amt:'1',u:'顆'},b:{n:'百香果糖漿',amt:'20',u:'ml'},c:{n:'蘇打水',amt:'加滿',u:'ml'},acid:{type:'lemon',amt:'10',u:'ml'},fill:{n:'',amt:'',u:''},method:'build'},
+  {id:12,a:{n:'葡萄柚汁',amt:'1',u:'顆'},b:{n:'鳳梨蘋果糖漿',amt:'15',u:'ml'},c:{n:'蔓越莓糖漿',amt:'15',u:'ml'},acid:{type:'acid',amt:'10',u:'ml'},fill:{n:'',amt:'',u:''},method:'build'},
+  {id:13,a:{n:'葡萄柚汁',amt:'1',u:'顆'},b:{n:'鳳梨蘋果糖漿',amt:'20',u:'ml'},c:{n:'蘇打水',amt:'加滿',u:'ml'},acid:{type:'lemon',amt:'10',u:'ml'},fill:{n:'',amt:'',u:''},method:'build'},
+  {id:14,a:{n:'葡萄柚汁',amt:'1',u:'顆'},b:{n:'蔓越莓糖漿',amt:'20',u:'ml'},c:{n:'蘇打水',amt:'加滿',u:'ml'},acid:{type:'lemon',amt:'10',u:'ml'},fill:{n:'',amt:'',u:''},method:'build'},
+  {id:15,a:{n:'柳橙汁',amt:'1',u:'顆'},b:{n:'桑椹糖漿',amt:'30',u:'ml'},c:{n:'迷迭香糖漿',amt:'20',u:'ml'},acid:{type:'lemon',amt:'15',u:'ml'},fill:{n:'',amt:'',u:''},method:'build'},
+  {id:16,a:{n:'柳橙汁',amt:'1',u:'顆'},b:{n:'桑椹糖漿',amt:'30',u:'ml'},c:{n:'百香果糖漿',amt:'15',u:'ml'},acid:{type:'lemon',amt:'15',u:'ml'},fill:{n:'',amt:'',u:''},method:'build'},
+  {id:17,a:{n:'柳橙汁',amt:'1',u:'顆'},b:{n:'桑椹糖漿',amt:'30',u:'ml'},c:{n:'鳳梨蘋果糖漿',amt:'15',u:'ml'},acid:{type:'lemon',amt:'15',u:'ml'},fill:{n:'',amt:'',u:''},method:'build'},
+  {id:18,a:{n:'柳橙汁',amt:'1',u:'顆'},b:{n:'桑椹糖漿',amt:'30',u:'ml'},c:{n:'蔓越莓糖漿',amt:'15',u:'ml'},acid:{type:'lemon',amt:'15',u:'ml'},fill:{n:'',amt:'',u:''},method:'build'},
+  {id:19,a:{n:'柳橙汁',amt:'1',u:'顆'},b:{n:'桑椹糖漿',amt:'30',u:'ml'},c:{n:'萬壽菊葉菜',amt:'0',u:'g'},acid:{type:'lemon',amt:'10',u:'ml'},fill:{n:'水',amt:'45',u:'ml'},method:'shake'},
+  {id:20,a:{n:'柳橙汁',amt:'1',u:'顆'},b:{n:'桑椹糖漿',amt:'30',u:'ml'},c:{n:'薄荷葉菜',amt:'0',u:'g'},acid:{type:'lemon',amt:'10',u:'ml'},fill:{n:'水',amt:'45',u:'ml'},method:'shake'},
+  {id:21,a:{n:'柳橙汁',amt:'1',u:'顆'},b:{n:'桑椹糖漿',amt:'30',u:'ml'},c:{n:'蘇打水',amt:'加滿',u:'ml'},acid:{type:'lemon',amt:'10',u:'ml'},fill:{n:'',amt:'',u:''},method:'build'},
+  {id:22,a:{n:'柳橙汁',amt:'1',u:'顆'},b:{n:'桑椹糖漿',amt:'30',u:'ml'},c:{n:'伯爵茶',amt:'加滿',u:'ml'},acid:{type:'lemon',amt:'10',u:'ml'},fill:{n:'',amt:'',u:''},method:'build'},
+  {id:23,a:{n:'柳橙汁',amt:'1',u:'顆'},b:{n:'百香果糖漿',amt:'15',u:'ml'},c:{n:'鳳梨蘋果糖漿',amt:'15',u:'ml'},acid:{type:'acid',amt:'10',u:'ml'},fill:{n:'',amt:'',u:''},method:'build'},
+  {id:24,a:{n:'柳橙汁',amt:'1',u:'顆'},b:{n:'百香果糖漿',amt:'15',u:'ml'},c:{n:'蔓越莓糖漿',amt:'15',u:'ml'},acid:{type:'acid',amt:'10',u:'ml'},fill:{n:'',amt:'',u:''},method:'build'},
+  {id:25,a:{n:'柳橙汁',amt:'1',u:'顆'},b:{n:'百香果糖漿',amt:'15',u:'ml'},c:{n:'柚子果醬',amt:'30',u:'g'},acid:{type:'acid',amt:'10',u:'ml'},fill:{n:'熱水沖柚子醬',amt:'60',u:'ml'},method:'build'},
+  {id:26,a:{n:'柳橙汁',amt:'1',u:'顆'},b:{n:'百香果糖漿',amt:'20',u:'ml'},c:{n:'萬壽菊葉菜',amt:'0',u:'g'},acid:{type:'-',amt:'0',u:'ml'},fill:{n:'水',amt:'45',u:'ml'},method:'shake'},
+  {id:27,a:{n:'柳橙汁',amt:'1',u:'顆'},b:{n:'百香果糖漿',amt:'20',u:'ml'},c:{n:'薄荷葉菜',amt:'0',u:'g'},acid:{type:'-',amt:'0',u:'ml'},fill:{n:'水',amt:'45',u:'ml'},method:'shake'},
+  {id:28,a:{n:'柳橙汁',amt:'1',u:'顆'},b:{n:'百香果糖漿',amt:'20',u:'ml'},c:{n:'蘇打水',amt:'加滿',u:'ml'},acid:{type:'-',amt:'0',u:'ml'},fill:{n:'',amt:'',u:''},method:'build'},
+  {id:29,a:{n:'柳橙汁',amt:'1',u:'顆'},b:{n:'百香果糖漿',amt:'20',u:'ml'},c:{n:'伯爵茶',amt:'加滿',u:'ml'},acid:{type:'-',amt:'0',u:'ml'},fill:{n:'',amt:'',u:''},method:'build'},
+  {id:30,a:{n:'柳橙汁',amt:'1',u:'顆'},b:{n:'鳳梨蘋果糖漿',amt:'20',u:'ml'},c:{n:'蔓越莓糖漿',amt:'15',u:'ml'},acid:{type:'acid',amt:'10',u:'ml'},fill:{n:'',amt:'',u:''},method:'build'},
+  {id:31,a:{n:'柳橙汁',amt:'2',u:'顆'},b:{n:'鳳梨蘋果糖漿',amt:'20',u:'ml'},c:{n:'薄荷葉菜',amt:'0',u:'g'},acid:{type:'-',amt:'0',u:'ml'},fill:{n:'',amt:'',u:''},method:'shake'},
+  {id:32,a:{n:'柳橙汁',amt:'1',u:'顆'},b:{n:'鳳梨蘋果糖漿',amt:'20',u:'ml'},c:{n:'蘇打水',amt:'加滿',u:'ml'},acid:{type:'-',amt:'0',u:'ml'},fill:{n:'',amt:'',u:''},method:'build'},
+  {id:33,a:{n:'柳橙汁',amt:'1',u:'顆'},b:{n:'鳳梨蘋果糖漿',amt:'20',u:'ml'},c:{n:'伯爵茶',amt:'加滿',u:'ml'},acid:{type:'-',amt:'0',u:'ml'},fill:{n:'',amt:'',u:''},method:'build'},
+  {id:35,a:{n:'柳橙汁',amt:'2',u:'顆'},b:{n:'蔓越莓糖漿',amt:'20',u:'ml'},c:{n:'萬壽菊葉菜',amt:'0',u:'g'},acid:{type:'-',amt:'0',u:'ml'},fill:{n:'',amt:'',u:''},method:'shake'},
+  {id:36,a:{n:'柳橙汁',amt:'2',u:'顆'},b:{n:'蔓越莓糖漿',amt:'20',u:'ml'},c:{n:'薄荷葉菜',amt:'0',u:'g'},acid:{type:'-',amt:'0',u:'ml'},fill:{n:'',amt:'',u:''},method:'shake'},
+  {id:37,a:{n:'柳橙汁',amt:'1',u:'顆'},b:{n:'蔓越莓糖漿',amt:'20',u:'ml'},c:{n:'蘇打水',amt:'加滿',u:'ml'},acid:{type:'-',amt:'0',u:'ml'},fill:{n:'',amt:'',u:''},method:'build'},
+  {id:38,a:{n:'柳橙汁',amt:'1',u:'顆'},b:{n:'蔓越莓糖漿',amt:'20',u:'ml'},c:{n:'伯爵茶',amt:'加滿',u:'ml'},acid:{type:'-',amt:'0',u:'ml'},fill:{n:'',amt:'',u:''},method:'build'},
+  {id:39,a:{n:'柳橙汁',amt:'1',u:'顆'},b:{n:'柚子果醬',amt:'30',u:'g'},c:{n:'萬壽菊葉菜',amt:'0',u:'g'},acid:{type:'-',amt:'0',u:'ml'},fill:{n:'熱水沖柚子醬',amt:'60',u:'ml'},method:'shake'},
+  {id:40,a:{n:'柳橙汁',amt:'1',u:'顆'},b:{n:'柚子果醬',amt:'30',u:'g'},c:{n:'薄荷葉菜',amt:'0',u:'g'},acid:{type:'-',amt:'0',u:'ml'},fill:{n:'熱水沖柚子醬',amt:'60',u:'ml'},method:'shake'},
+  {id:41,a:{n:'柳橙汁',amt:'1',u:'顆'},b:{n:'柚子果醬',amt:'30',u:'g'},c:{n:'蘇打水',amt:'加滿',u:'ml'},acid:{type:'-',amt:'0',u:'ml'},fill:{n:'熱水沖柚子醬',amt:'60',u:'ml'},method:'build'},
+  {id:42,a:{n:'柳橙汁',amt:'1',u:'顆'},b:{n:'柚子果醬',amt:'30',u:'g'},c:{n:'伯爵茶',amt:'加滿',u:'ml'},acid:{type:'-',amt:'0',u:'ml'},fill:{n:'熱水沖柚子醬',amt:'60',u:'ml'},method:'build'},
+  {id:43,a:{n:'桑椹糖漿',amt:'30',u:'ml'},b:{n:'迷迭香糖漿',amt:'15',u:'ml'},c:{n:'百香果糖漿',amt:'15',u:'ml'},acid:{type:'acid',amt:'10',u:'ml'},fill:{n:'水',amt:'加滿',u:'ml'},method:'build'},
+  {id:44,a:{n:'桑椹糖漿',amt:'30',u:'ml'},b:{n:'迷迭香糖漿',amt:'15',u:'ml'},c:{n:'鳳梨蘋果糖漿',amt:'15',u:'ml'},acid:{type:'acid',amt:'10',u:'ml'},fill:{n:'水',amt:'加滿',u:'ml'},method:'build'},
+  {id:45,a:{n:'桑椹糖漿',amt:'30',u:'ml'},b:{n:'迷迭香糖漿',amt:'15',u:'ml'},c:{n:'蔓越莓糖漿',amt:'15',u:'ml'},acid:{type:'acid',amt:'10',u:'ml'},fill:{n:'水',amt:'加滿',u:'ml'},method:'build'},
+  {id:46,a:{n:'桑椹糖漿',amt:'30',u:'ml'},b:{n:'迷迭香糖漿',amt:'20',u:'ml'},c:{n:'萬壽菊葉菜',amt:'0',u:'g'},acid:{type:'acid',amt:'10',u:'ml'},fill:{n:'水',amt:'加滿',u:'ml'},method:'shake'},
+  {id:47,a:{n:'桑椹糖漿',amt:'30',u:'ml'},b:{n:'迷迭香糖漿',amt:'20',u:'ml'},c:{n:'薄荷葉菜',amt:'0',u:'g'},acid:{type:'acid',amt:'10',u:'ml'},fill:{n:'水',amt:'加滿',u:'ml'},method:'shake'},
+  {id:48,a:{n:'桑椹糖漿',amt:'30',u:'ml'},b:{n:'迷迭香糖漿',amt:'20',u:'ml'},c:{n:'蘇打水',amt:'加滿',u:'ml'},acid:{type:'acid',amt:'10',u:'ml'},fill:{n:'',amt:'',u:''},method:'build'},
+  {id:49,a:{n:'桑椹糖漿',amt:'30',u:'ml'},b:{n:'迷迭香糖漿',amt:'20',u:'ml'},c:{n:'伯爵茶',amt:'加滿',u:'ml'},acid:{type:'acid',amt:'10',u:'ml'},fill:{n:'',amt:'',u:''},method:'build'},
+  {id:50,a:{n:'桑椹糖漿',amt:'30',u:'ml'},b:{n:'百香果糖漿',amt:'15',u:'ml'},c:{n:'鳳梨蘋果糖漿',amt:'15',u:'ml'},acid:{type:'lemon',amt:'15',u:'ml'},fill:{n:'水',amt:'加滿',u:'ml'},method:'build'},
+  {id:51,a:{n:'桑椹糖漿',amt:'30',u:'ml'},b:{n:'百香果糖漿',amt:'15',u:'ml'},c:{n:'蔓越莓糖漿',amt:'15',u:'ml'},acid:{type:'lemon',amt:'15',u:'ml'},fill:{n:'水',amt:'加滿',u:'ml'},method:'build'},
+  {id:53,a:{n:'桑椹糖漿',amt:'30',u:'ml'},b:{n:'百香果糖漿',amt:'20',u:'ml'},c:{n:'萬壽菊葉菜',amt:'0',u:'g'},acid:{type:'lemon',amt:'10',u:'ml'},fill:{n:'水',amt:'加滿',u:'ml'},method:'shake'},
+  {id:54,a:{n:'桑椹糖漿',amt:'30',u:'ml'},b:{n:'百香果糖漿',amt:'20',u:'ml'},c:{n:'薄荷葉菜',amt:'0',u:'g'},acid:{type:'lemon',amt:'10',u:'ml'},fill:{n:'水',amt:'加滿',u:'ml'},method:'shake'},
+  {id:55,a:{n:'桑椹糖漿',amt:'30',u:'ml'},b:{n:'百香果糖漿',amt:'20',u:'ml'},c:{n:'蘇打水',amt:'加滿',u:'ml'},acid:{type:'lemon',amt:'10',u:'ml'},fill:{n:'',amt:'',u:''},method:'build'},
+  {id:56,a:{n:'桑椹糖漿',amt:'30',u:'ml'},b:{n:'百香果糖漿',amt:'20',u:'ml'},c:{n:'伯爵茶',amt:'加滿',u:'ml'},acid:{type:'lemon',amt:'10',u:'ml'},fill:{n:'',amt:'',u:''},method:'build'},
+  {id:57,a:{n:'桑椹糖漿',amt:'30',u:'ml'},b:{n:'鳳梨蘋果糖漿',amt:'15',u:'ml'},c:{n:'蔓越莓糖漿',amt:'15',u:'ml'},acid:{type:'lemon',amt:'10',u:'ml'},fill:{n:'水',amt:'加滿',u:'ml'},method:'build'},
+  {id:59,a:{n:'桑椹糖漿',amt:'30',u:'ml'},b:{n:'鳳梨蘋果糖漿',amt:'15',u:'ml'},c:{n:'萬壽菊葉菜',amt:'0',u:'g'},acid:{type:'lemon',amt:'10',u:'ml'},fill:{n:'水',amt:'加滿',u:'ml'},method:'shake'},
+  {id:60,a:{n:'桑椹糖漿',amt:'30',u:'ml'},b:{n:'鳳梨蘋果糖漿',amt:'15',u:'ml'},c:{n:'薄荷葉菜',amt:'0',u:'g'},acid:{type:'lemon',amt:'10',u:'ml'},fill:{n:'水',amt:'加滿',u:'ml'},method:'shake'},
+  {id:61,a:{n:'桑椹糖漿',amt:'30',u:'ml'},b:{n:'鳳梨蘋果糖漿',amt:'20',u:'ml'},c:{n:'蘇打水',amt:'加滿',u:'ml'},acid:{type:'lemon',amt:'10',u:'ml'},fill:{n:'',amt:'',u:''},method:'build'},
+  {id:62,a:{n:'桑椹糖漿',amt:'30',u:'ml'},b:{n:'鳳梨蘋果糖漿',amt:'20',u:'ml'},c:{n:'伯爵茶',amt:'加滿',u:'ml'},acid:{type:'lemon',amt:'10',u:'ml'},fill:{n:'',amt:'',u:''},method:'build'},
+  {id:63,a:{n:'桑椹糖漿',amt:'30',u:'ml'},b:{n:'蔓越莓糖漿',amt:'15',u:'ml'},c:{n:'柚子果醬',amt:'60',u:'g'},acid:{type:'lemon',amt:'10',u:'ml'},fill:{n:'熱水沖柚子醬',amt:'60',u:'ml'},method:'build'},
+  {id:64,a:{n:'桑椹糖漿',amt:'30',u:'ml'},b:{n:'蔓越莓糖漿',amt:'15',u:'ml'},c:{n:'萬壽菊葉菜',amt:'0',u:'g'},acid:{type:'lemon',amt:'10',u:'ml'},fill:{n:'水',amt:'加滿',u:'ml'},method:'shake'},
+  {id:65,a:{n:'桑椹糖漿',amt:'30',u:'ml'},b:{n:'蔓越莓糖漿',amt:'15',u:'ml'},c:{n:'薄荷葉菜',amt:'0',u:'g'},acid:{type:'lemon',amt:'10',u:'ml'},fill:{n:'水',amt:'加滿',u:'ml'},method:'shake'},
+  {id:66,a:{n:'桑椹糖漿',amt:'30',u:'ml'},b:{n:'蔓越莓糖漿',amt:'15',u:'ml'},c:{n:'蘇打水',amt:'加滿',u:'ml'},acid:{type:'lemon',amt:'10',u:'ml'},fill:{n:'',amt:'',u:''},method:'build'},
+  {id:67,a:{n:'桑椹糖漿',amt:'30',u:'ml'},b:{n:'蔓越莓糖漿',amt:'15',u:'ml'},c:{n:'伯爵茶',amt:'加滿',u:'ml'},acid:{type:'lemon',amt:'10',u:'ml'},fill:{n:'',amt:'',u:''},method:'build'},
+  {id:68,a:{n:'桑椹糖漿',amt:'30',u:'ml'},b:{n:'萬壽菊葉菜',amt:'15',u:'g'},c:{n:'蘇打水',amt:'加滿',u:'ml'},acid:{type:'-',amt:'0',u:'ml'},fill:{n:'',amt:'',u:''},method:'shake'},
+  {id:69,a:{n:'桑椹糖漿',amt:'30',u:'ml'},b:{n:'萬壽菊葉菜',amt:'15',u:'g'},c:{n:'伯爵茶',amt:'加滿',u:'ml'},acid:{type:'-',amt:'0',u:'ml'},fill:{n:'',amt:'',u:''},method:'shake'},
+  {id:70,a:{n:'桑椹糖漿',amt:'50',u:'ml'},b:{n:'薄荷葉菜',amt:'15',u:'g'},c:{n:'蘇打水',amt:'加滿',u:'ml'},acid:{type:'-',amt:'0',u:'ml'},fill:{n:'',amt:'',u:''},method:'shake'},
+  {id:71,a:{n:'桑椹糖漿',amt:'50',u:'ml'},b:{n:'薄荷葉菜',amt:'15',u:'g'},c:{n:'伯爵茶',amt:'加滿',u:'ml'},acid:{type:'-',amt:'0',u:'ml'},fill:{n:'',amt:'',u:''},method:'shake'},
+  {id:72,a:{n:'迷迭香糖漿',amt:'20',u:'ml'},b:{n:'百香果糖漿',amt:'15',u:'ml'},c:{n:'鳳梨蘋果糖漿',amt:'15',u:'ml'},acid:{type:'acid',amt:'15',u:'ml'},fill:{n:'',amt:'',u:''},method:'build'},
+  {id:73,a:{n:'迷迭香糖漿',amt:'20',u:'ml'},b:{n:'百香果糖漿',amt:'15',u:'ml'},c:{n:'蔓越莓糖漿',amt:'15',u:'ml'},acid:{type:'acid',amt:'15',u:'ml'},fill:{n:'',amt:'',u:''},method:'build'},
+  {id:74,a:{n:'迷迭香糖漿',amt:'20',u:'ml'},b:{n:'百香果糖漿',amt:'15',u:'ml'},c:{n:'柚子果醬',amt:'20',u:'g'},acid:{type:'acid',amt:'15',u:'ml'},fill:{n:'熱水沖柚子醬',amt:'40',u:'ml'},method:'build'},
+  {id:75,a:{n:'迷迭香糖漿',amt:'20',u:'ml'},b:{n:'百香果糖漿',amt:'20',u:'ml'},c:{n:'萬壽菊葉菜',amt:'0',u:'g'},acid:{type:'lemon',amt:'10',u:'ml'},fill:{n:'水',amt:'加滿',u:'ml'},method:'shake'},
+  {id:76,a:{n:'迷迭香糖漿',amt:'20',u:'ml'},b:{n:'百香果糖漿',amt:'20',u:'ml'},c:{n:'薄荷葉菜',amt:'0',u:'g'},acid:{type:'lemon',amt:'10',u:'ml'},fill:{n:'水',amt:'加滿',u:'ml'},method:'shake'},
+  {id:77,a:{n:'迷迭香糖漿',amt:'20',u:'ml'},b:{n:'百香果糖漿',amt:'20',u:'ml'},c:{n:'蘇打水',amt:'加滿',u:'ml'},acid:{type:'lemon',amt:'10',u:'ml'},fill:{n:'',amt:'',u:''},method:'build'},
+  {id:78,a:{n:'迷迭香糖漿',amt:'20',u:'ml'},b:{n:'百香果糖漿',amt:'15',u:'ml'},c:{n:'伯爵茶',amt:'加滿',u:'ml'},acid:{type:'lemon',amt:'10',u:'ml'},fill:{n:'',amt:'',u:''},method:'build'},
+  {id:79,a:{n:'迷迭香糖漿',amt:'20',u:'ml'},b:{n:'鳳梨蘋果糖漿',amt:'15',u:'ml'},c:{n:'蔓越莓糖漿',amt:'15',u:'ml'},acid:{type:'acid',amt:'15',u:'ml'},fill:{n:'',amt:'',u:''},method:'build'},
+  {id:80,a:{n:'迷迭香糖漿',amt:'20',u:'ml'},b:{n:'鳳梨蘋果糖漿',amt:'15',u:'ml'},c:{n:'柚子果醬',amt:'20',u:'g'},acid:{type:'acid',amt:'15',u:'ml'},fill:{n:'熱水沖柚子醬',amt:'40',u:'ml'},method:'build'},
+  {id:81,a:{n:'迷迭香糖漿',amt:'20',u:'ml'},b:{n:'鳳梨蘋果糖漿',amt:'15',u:'ml'},c:{n:'萬壽菊葉菜',amt:'0',u:'g'},acid:{type:'acid',amt:'10',u:'ml'},fill:{n:'',amt:'',u:''},method:'shake'},
+  {id:82,a:{n:'迷迭香糖漿',amt:'20',u:'ml'},b:{n:'鳳梨蘋果糖漿',amt:'15',u:'ml'},c:{n:'薄荷葉菜',amt:'0',u:'g'},acid:{type:'acid',amt:'10',u:'ml'},fill:{n:'',amt:'',u:''},method:'shake'},
+  {id:83,a:{n:'迷迭香糖漿',amt:'20',u:'ml'},b:{n:'鳳梨蘋果糖漿',amt:'15',u:'ml'},c:{n:'蘇打水',amt:'加滿',u:'ml'},acid:{type:'acid',amt:'10',u:'ml'},fill:{n:'',amt:'',u:''},method:'build'},
+  {id:84,a:{n:'迷迭香糖漿',amt:'20',u:'ml'},b:{n:'鳳梨蘋果糖漿',amt:'15',u:'ml'},c:{n:'伯爵茶',amt:'加滿',u:'ml'},acid:{type:'acid',amt:'10',u:'ml'},fill:{n:'',amt:'',u:''},method:'build'},
+  {id:85,a:{n:'迷迭香糖漿',amt:'20',u:'ml'},b:{n:'蔓越莓糖漿',amt:'15',u:'ml'},c:{n:'柚子果醬',amt:'20',u:'g'},acid:{type:'acid',amt:'15',u:'ml'},fill:{n:'熱水沖柚子醬',amt:'40',u:'ml'},method:'build'},
+  {id:86,a:{n:'迷迭香糖漿',amt:'20',u:'ml'},b:{n:'蔓越莓糖漿',amt:'20',u:'ml'},c:{n:'萬壽菊葉菜',amt:'0',u:'g'},acid:{type:'acid',amt:'10',u:'ml'},fill:{n:'水',amt:'加滿',u:'ml'},method:'shake'},
+  {id:87,a:{n:'迷迭香糖漿',amt:'20',u:'ml'},b:{n:'蔓越莓糖漿',amt:'20',u:'ml'},c:{n:'薄荷葉菜',amt:'0',u:'g'},acid:{type:'acid',amt:'10',u:'ml'},fill:{n:'水',amt:'加滿',u:'ml'},method:'shake'},
+  {id:88,a:{n:'迷迭香糖漿',amt:'20',u:'ml'},b:{n:'蔓越莓糖漿',amt:'20',u:'ml'},c:{n:'蘇打水',amt:'加滿',u:'ml'},acid:{type:'acid',amt:'10',u:'ml'},fill:{n:'',amt:'',u:''},method:'build'},
+  {id:89,a:{n:'迷迭香糖漿',amt:'20',u:'ml'},b:{n:'蔓越莓糖漿',amt:'20',u:'ml'},c:{n:'伯爵茶',amt:'加滿',u:'ml'},acid:{type:'acid',amt:'10',u:'ml'},fill:{n:'',amt:'',u:''},method:'build'},
+  {id:91,a:{n:'迷迭香糖漿',amt:'20',u:'ml'},b:{n:'柚子果醬',amt:'30',u:'g'},c:{n:'萬壽菊葉菜',amt:'0',u:'g'},acid:{type:'acid',amt:'10',u:'ml'},fill:{n:'熱水沖柚子醬',amt:'60',u:'ml'},method:'shake'},
+  {id:92,a:{n:'迷迭香糖漿',amt:'20',u:'ml'},b:{n:'柚子果醬',amt:'30',u:'g'},c:{n:'薄荷葉菜',amt:'0',u:'g'},acid:{type:'acid',amt:'10',u:'ml'},fill:{n:'熱水沖柚子醬',amt:'60',u:'ml'},method:'shake'},
+  {id:93,a:{n:'迷迭香糖漿',amt:'20',u:'ml'},b:{n:'柚子果醬',amt:'30',u:'g'},c:{n:'蘇打水',amt:'加滿',u:'ml'},acid:{type:'acid',amt:'10',u:'ml'},fill:{n:'熱水沖柚子醬',amt:'60',u:'ml'},method:'build'},
+  {id:94,a:{n:'迷迭香糖漿',amt:'20',u:'ml'},b:{n:'柚子果醬',amt:'30',u:'g'},c:{n:'伯爵茶',amt:'加滿',u:'ml'},acid:{type:'acid',amt:'10',u:'ml'},fill:{n:'熱水沖柚子醬',amt:'60',u:'ml'},method:'build'},
+  {id:95,a:{n:'迷迭香糖漿',amt:'20',u:'ml'},b:{n:'萬壽菊葉菜',amt:'0',u:'g'},c:{n:'蘇打水',amt:'加滿',u:'ml'},acid:{type:'-',amt:'0',u:'ml'},fill:{n:'',amt:'',u:''},method:'shake'},
+  {id:96,a:{n:'迷迭香糖漿',amt:'20',u:'ml'},b:{n:'萬壽菊葉菜',amt:'0',u:'g'},c:{n:'伯爵茶',amt:'加滿',u:'ml'},acid:{type:'-',amt:'0',u:'ml'},fill:{n:'',amt:'',u:''},method:'shake'},
+  {id:97,a:{n:'迷迭香糖漿',amt:'20',u:'ml'},b:{n:'薄荷葉菜',amt:'0',u:'g'},c:{n:'蘇打水',amt:'加滿',u:'ml'},acid:{type:'-',amt:'0',u:'ml'},fill:{n:'',amt:'',u:''},method:'shake'},
+  {id:98,a:{n:'迷迭香糖漿',amt:'20',u:'ml'},b:{n:'薄荷葉菜',amt:'0',u:'g'},c:{n:'伯爵茶',amt:'加滿',u:'ml'},acid:{type:'-',amt:'0',u:'ml'},fill:{n:'',amt:'',u:''},method:'shake'},
+  {id:99,a:{n:'百香果糖漿',amt:'20',u:'ml'},b:{n:'鳳梨蘋果糖漿',amt:'15',u:'ml'},c:{n:'蔓越莓糖漿',amt:'15',u:'ml'},acid:{type:'lemon',amt:'15',u:'ml'},fill:{n:'水',amt:'加滿',u:'ml'},method:'build'},
+  {id:100,a:{n:'百香果糖漿',amt:'20',u:'ml'},b:{n:'鳳梨蘋果糖漿',amt:'15',u:'ml'},c:{n:'柚子果醬',amt:'30',u:'g'},acid:{type:'lemon',amt:'15',u:'ml'},fill:{n:'熱水沖柚子醬',amt:'60',u:'ml'},method:'build'},
+  {id:101,a:{n:'百香果糖漿',amt:'20',u:'ml'},b:{n:'鳳梨蘋果糖漿',amt:'20',u:'ml'},c:{n:'萬壽菊葉菜',amt:'0',u:'g'},acid:{type:'lemon',amt:'15',u:'ml'},fill:{n:'',amt:'',u:''},method:'shake'},
+  {id:102,a:{n:'百香果糖漿',amt:'20',u:'ml'},b:{n:'鳳梨蘋果糖漿',amt:'20',u:'ml'},c:{n:'薄荷葉菜',amt:'0',u:'g'},acid:{type:'lemon',amt:'15',u:'ml'},fill:{n:'',amt:'',u:''},method:'shake'},
+  {id:103,a:{n:'百香果糖漿',amt:'20',u:'ml'},b:{n:'鳳梨蘋果糖漿',amt:'15',u:'ml'},c:{n:'蘇打水',amt:'加滿',u:'ml'},acid:{type:'-',amt:'0',u:'ml'},fill:{n:'',amt:'',u:''},method:'build'},
+  {id:104,a:{n:'百香果糖漿',amt:'20',u:'ml'},b:{n:'鳳梨蘋果糖漿',amt:'15',u:'ml'},c:{n:'伯爵茶',amt:'加滿',u:'ml'},acid:{type:'-',amt:'0',u:'ml'},fill:{n:'',amt:'',u:''},method:'build'},
+  {id:105,a:{n:'百香果糖漿',amt:'20',u:'ml'},b:{n:'蔓越莓糖漿',amt:'15',u:'ml'},c:{n:'柚子果醬',amt:'30',u:'g'},acid:{type:'lemon',amt:'15',u:'ml'},fill:{n:'熱水沖柚子醬',amt:'60',u:'ml'},method:'build'},
+  {id:106,a:{n:'百香果糖漿',amt:'20',u:'ml'},b:{n:'蔓越莓糖漿',amt:'15',u:'ml'},c:{n:'萬壽菊葉菜',amt:'0',u:'g'},acid:{type:'-',amt:'0',u:'ml'},fill:{n:'水',amt:'加滿',u:'ml'},method:'shake'},
+  {id:107,a:{n:'百香果糖漿',amt:'20',u:'ml'},b:{n:'蔓越莓糖漿',amt:'15',u:'ml'},c:{n:'薄荷葉菜',amt:'0',u:'g'},acid:{type:'-',amt:'0',u:'ml'},fill:{n:'水',amt:'加滿',u:'ml'},method:'shake'},
+  {id:108,a:{n:'百香果糖漿',amt:'20',u:'ml'},b:{n:'蔓越莓糖漿',amt:'15',u:'ml'},c:{n:'蘇打水',amt:'加滿',u:'ml'},acid:{type:'-',amt:'0',u:'ml'},fill:{n:'',amt:'',u:''},method:'build'},
+  {id:109,a:{n:'百香果糖漿',amt:'20',u:'ml'},b:{n:'蔓越莓糖漿',amt:'15',u:'ml'},c:{n:'伯爵茶',amt:'加滿',u:'ml'},acid:{type:'-',amt:'0',u:'ml'},fill:{n:'',amt:'',u:''},method:'build'},
+  {id:110,a:{n:'百香果糖漿',amt:'20',u:'ml'},b:{n:'柚子果醬',amt:'30',u:'g'},c:{n:'萬壽菊葉菜',amt:'0',u:'g'},acid:{type:'lemon',amt:'10',u:'ml'},fill:{n:'熱水沖柚子醬',amt:'60',u:'ml'},method:'shake'},
+  {id:111,a:{n:'百香果糖漿',amt:'20',u:'ml'},b:{n:'柚子果醬',amt:'30',u:'g'},c:{n:'薄荷葉菜',amt:'0',u:'g'},acid:{type:'lemon',amt:'10',u:'ml'},fill:{n:'熱水沖柚子醬',amt:'60',u:'ml'},method:'shake'},
+  {id:112,a:{n:'百香果糖漿',amt:'20',u:'ml'},b:{n:'柚子果醬',amt:'30',u:'g'},c:{n:'蘇打水',amt:'加滿',u:'ml'},acid:{type:'lemon',amt:'10',u:'ml'},fill:{n:'',amt:'',u:''},method:'build'},
+  {id:113,a:{n:'百香果糖漿',amt:'20',u:'ml'},b:{n:'柚子果醬',amt:'30',u:'g'},c:{n:'伯爵茶',amt:'加滿',u:'ml'},acid:{type:'lemon',amt:'10',u:'ml'},fill:{n:'',amt:'',u:''},method:'build'},
+  {id:114,a:{n:'鳳梨蘋果糖漿',amt:'20',u:'ml'},b:{n:'蔓越莓糖漿',amt:'15',u:'ml'},c:{n:'萬壽菊葉菜',amt:'0',u:'g'},acid:{type:'lemon',amt:'10',u:'ml'},fill:{n:'水',amt:'加滿',u:'ml'},method:'shake'},
+  {id:115,a:{n:'鳳梨蘋果糖漿',amt:'20',u:'ml'},b:{n:'蔓越莓糖漿',amt:'15',u:'ml'},c:{n:'薄荷葉菜',amt:'0',u:'g'},acid:{type:'lemon',amt:'10',u:'ml'},fill:{n:'水',amt:'加滿',u:'ml'},method:'shake'},
+  {id:116,a:{n:'鳳梨蘋果糖漿',amt:'20',u:'ml'},b:{n:'蔓越莓糖漿',amt:'15',u:'ml'},c:{n:'蘇打水',amt:'加滿',u:'ml'},acid:{type:'lemon',amt:'10',u:'ml'},fill:{n:'',amt:'',u:''},method:'build'},
+  {id:117,a:{n:'鳳梨蘋果糖漿',amt:'20',u:'ml'},b:{n:'蔓越莓糖漿',amt:'15',u:'ml'},c:{n:'伯爵茶',amt:'加滿',u:'ml'},acid:{type:'lemon',amt:'10',u:'ml'},fill:{n:'',amt:'',u:''},method:'build'},
+  {id:118,a:{n:'鳳梨蘋果糖漿',amt:'20',u:'ml'},b:{n:'柚子果醬',amt:'20',u:'g'},c:{n:'蘇打水',amt:'加滿',u:'ml'},acid:{type:'lemon',amt:'10',u:'ml'},fill:{n:'熱水沖柚子醬',amt:'40',u:'ml'},method:'build'},
+  {id:119,a:{n:'鳳梨蘋果糖漿',amt:'20',u:'ml'},b:{n:'柚子果醬',amt:'20',u:'g'},c:{n:'伯爵茶',amt:'加滿',u:'ml'},acid:{type:'lemon',amt:'10',u:'ml'},fill:{n:'熱水沖柚子醬',amt:'40',u:'ml'},method:'build'},
+  {id:120,a:{n:'蔓越莓糖漿',amt:'20',u:'ml'},b:{n:'柚子果醬',amt:'30',u:'g'},c:{n:'萬壽菊葉菜',amt:'0',u:'g'},acid:{type:'lemon',amt:'10',u:'ml'},fill:{n:'熱水沖柚子醬',amt:'60',u:'ml'},method:'shake'},
+  {id:121,a:{n:'蔓越莓糖漿',amt:'20',u:'ml'},b:{n:'柚子果醬',amt:'30',u:'g'},c:{n:'薄荷葉菜',amt:'0',u:'g'},acid:{type:'lemon',amt:'10',u:'ml'},fill:{n:'熱水沖柚子醬',amt:'60',u:'ml'},method:'shake'},
+  {id:122,a:{n:'蔓越莓糖漿',amt:'20',u:'ml'},b:{n:'柚子果醬',amt:'30',u:'g'},c:{n:'蘇打水',amt:'加滿',u:'ml'},acid:{type:'lemon',amt:'10',u:'ml'},fill:{n:'熱水沖柚子醬',amt:'60',u:'ml'},method:'build'},
+  {id:123,a:{n:'蔓越莓糖漿',amt:'20',u:'ml'},b:{n:'柚子果醬',amt:'30',u:'g'},c:{n:'伯爵茶',amt:'加滿',u:'ml'},acid:{type:'lemon',amt:'10',u:'ml'},fill:{n:'熱水沖柚子醬',amt:'60',u:'ml'},method:'build'},
+  {id:124,a:{n:'蔓越莓糖漿',amt:'20',u:'ml'},b:{n:'薄荷葉菜',amt:'0',u:'g'},c:{n:'蘇打水',amt:'加滿',u:'ml'},acid:{type:'-',amt:'0',u:'ml'},fill:{n:'',amt:'',u:''},method:'shake'},
+  {id:125,a:{n:'蔓越莓糖漿',amt:'20',u:'ml'},b:{n:'薄荷葉菜',amt:'0',u:'g'},c:{n:'伯爵茶',amt:'加滿',u:'ml'},acid:{type:'-',amt:'0',u:'ml'},fill:{n:'',amt:'',u:''},method:'shake'},
+  {id:126,a:{n:'柚子果醬',amt:'30',u:'g'},b:{n:'萬壽菊葉菜',amt:'0',u:'g'},c:{n:'蘇打水',amt:'加滿',u:'ml'},acid:{type:'-',amt:'0',u:'ml'},fill:{n:'熱水沖柚子醬',amt:'60',u:'ml'},method:'shake'},
+  {id:127,a:{n:'柚子果醬',amt:'30',u:'g'},b:{n:'萬壽菊葉菜',amt:'0',u:'g'},c:{n:'伯爵茶',amt:'加滿',u:'ml'},acid:{type:'-',amt:'0',u:'ml'},fill:{n:'熱水沖柚子醬',amt:'60',u:'ml'},method:'shake'},
+  {id:128,a:{n:'柚子果醬',amt:'30',u:'g'},b:{n:'薄荷葉菜',amt:'0',u:'g'},c:{n:'蘇打水',amt:'加滿',u:'ml'},acid:{type:'-',amt:'0',u:'ml'},fill:{n:'熱水沖柚子醬',amt:'60',u:'ml'},method:'shake'},
+  {id:129,a:{n:'柚子果醬',amt:'30',u:'g'},b:{n:'薄荷葉菜',amt:'0',u:'g'},c:{n:'伯爵茶',amt:'加滿',u:'ml'},acid:{type:'-',amt:'0',u:'ml'},fill:{n:'熱水沖柚子醬',amt:'60',u:'ml'},method:'shake'}
+];
+
+let FOOD_RECIPES=[{id:101,name:"（食譜區）請由右上角＋新增食譜",cat:"說明",desc:"請點右上角 ＋ 新增你的餐食食譜。",ingr:[],steps:[],pairing:"",fav:false,img:null}];
+
+let SPECIALS=[];
+let nextId={bottle:10,recipe:10,food:110,special:100};
+const PREFS=[
+  {key:'acid',label:'酸度',opts:['不酸','微酸','酸','偏酸']},
+  {key:'sweet',label:'甜度',opts:['不甜','微甜','甜','偏甜']},
+  {key:'bitter',label:'苦度',opts:['不苦','微苦','苦','偏苦']},
+  {key:'body',label:'口感',opts:['清爽','中等','醇厚','濃郁']},
+  {key:'smoke',label:'煙燻感',opts:['無','微微','明顯','強烈']},
+  {key:'style',label:'風格',opts:['清新果香','花香雅緻','香料辛辣','木質沉穩','海洋礦物']},
+  {key:'abv',label:'酒感',opts:['輕盈','中等','偏烈','非常烈']},
+  {key:'temp',label:'溫度',opts:['冰飲','室溫','熱飲']},
+];
+const TWEAK_DIMS=[
+  {key:'acid',label:'酸度'},{key:'sweet',label:'甜度'},{key:'bitter',label:'苦度'},
+  {key:'smoke',label:'煙燻感'},{key:'body',label:'酒感強度'},
+];
+const TWEAK_TIPS={
+  acid:{reduce:['減少檸檬汁 3–5ml，加少量糖漿補平衡','以蜂蜜糖漿取代部分糖漿','延長攪拌5秒讓稀釋軟化酸感'],boost:['增加檸檬汁 5ml 或補入少量柚子汁','加 2 dash 柑橘苦精','多擠一點葡萄柚皮精油在液面']},
+  sweet:{reduce:['糖漿減少 3–5ml','增加苦精 1 dash 壓制甜感','縮短搖盪時間讓酒感更乾'],boost:['加入 5ml 蜂蜜糖漿或龍舌蘭蜜','接骨木花利口酒增加 5ml','杯底放糖漬櫻桃']},
+  bitter:{reduce:['苦精整體減量 1 dash','增加甜味利口酒 5ml 蓋住苦感','加入少量鹽水 1 dash 中和苦味'],boost:['安格仕苦精加到 4–5 dash','加入 Campari 5ml','少量 Fernet-Branca 1–2ml']},
+  smoke:{reduce:['泥煤威士忌由 5ml 減為 2–3ml','改用調和威士忌取代泥煤','不做漂浮，直接攪拌稀釋煙燻'],boost:['泥煤威士忌增加至 10ml','攪拌前先用泥煤威士忌潤杯','噴霧器在杯內噴一下泥煤']},
+  body:{reduce:['基酒減少 5ml，加氣泡水 10ml','縮短攪拌時間至 25 秒','換用較輕盈的調和威士忌'],boost:['基酒增加至 50ml','攪拌延長至 45 秒','加入少量 Demerara 糖漿 3ml']},
+};
+
+// ─── APP STATE ───────────────────────────────────────────
+let APP={
+  nav:'home',detailType:null,detailId:null,search:'',
+  sp:{selCat:null,prefs:{},waiting:false,result:null,saved:[],tweaks:{},tweakAdv:null,showTweak:false},
+  mocktailTool:false,mocktailSel:{a:'',b:'',c:''},
+};
+
+// ─── HELPERS ─────────────────────────────────────────────
+function abvColor(a){return a>=50?'#e07b4a':a>=40?'#c9a84c':'#7db87d'}
+function catBottles(cat){return BOTTLES.filter(b=>b.cat===cat)}
+function allCats(){return[...new Set(BOTTLES.filter(b=>b.cat!=='苦精').map(b=>b.cat))]}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+
+// ─── ROUTING ─────────────────────────────────────────────
+function go(nav){APP.nav=nav;APP.detailType=null;APP.detailId=null;APP.search='';if(nav!=='mocktail')APP.mocktailTool=false;render(true);}
+function goDetail(type,id){APP.detailType=type;APP.detailId=id;render(true);}
+function goBack(){
+  if(APP.sp.result&&APP.nav==='special'){APP.sp.result=null;APP.sp.tweaks={};APP.sp.tweakAdv=null;APP.sp.showTweak=false;render(true);return;}
+  APP.detailType=null;APP.detailId=null;render(true);
+}
+
+
+// ─── RENDER ──────────────────────────────────────────────
+function render(scrollTop){
+  const sc=document.getElementById('screen');
+  const prev=sc.scrollTop;
+  const nav=APP.nav;
+  let html='';
+  if(nav==='home') html=renderHome();
+  else if(nav==='cocktails'&&APP.detailId) html=renderRecipeDetail();
+  else if(nav==='cocktails') html=renderRecipeList();
+  else if(nav==='cabinet') html=renderCabinet();
+  else if(nav==='favourites') html=renderFavourites();
+  else if(nav==='special'&&APP.sp.result) html=renderSpecialResult();
+  else if(nav==='special') html=renderSpecial();
+  else if(nav==='mocktail'&&APP.detailId) html=renderMocktailDetail();
+  else if(nav==='mocktail'&&APP.mocktailTool) html=renderMocktailFormulaTool();
+  else if(nav==='mocktail') html=renderMocktailList();
+  else if(nav==='food'&&APP.detailId) html=renderFoodDetail();
+  else if(nav==='food') html=renderFoodList();
+  sc.innerHTML=html;
+  sc.scrollTop=scrollTop?0:prev;
+  document.querySelectorAll('.bnbtn').forEach(b=>b.classList.toggle('active',b.dataset.nav===nav));
+}
+
+// ─── HOME ────────────────────────────────────────────────
+function renderHome(){
+  const favCount=RECIPES.filter(r=>r.fav).length+FOOD_RECIPES.filter(r=>r.fav).length+SPECIALS.filter(s=>s.fav).length;
+  return `<div class="home-hero">
+    <div class="home-logo">✦ My Bar</div>
+    <div class="home-tagline">今天要調什麼？</div>
+  </div>
+  <div class="home-grid">
+    <div class="hcard featured" onclick="go('cocktails')"><div class="hcard-icon">🍸</div><div class="hcard-label">調酒作法</div><div class="hcard-sub">${RECIPES.length} 款配方</div></div>
+    <div class="hcard" onclick="go('cabinet')"><div class="hcard-icon">🍾</div><div class="hcard-label">酒櫃</div><div class="hcard-sub">${BOTTLES.length} 瓶在庫</div></div>
+    <div class="hcard" onclick="go('mocktail')"><div class="hcard-icon">🌿</div><div class="hcard-label">無酒精作法</div><div class="hcard-sub">Mocktail 配方</div></div>
+    <div class="hcard" onclick="go('special')"><div class="hcard-icon">✦</div><div class="hcard-label">特調專區</div><div class="hcard-sub">依喜好生成配方</div></div>
+    <div class="hcard" onclick="go('food')"><div class="hcard-icon">🍽</div><div class="hcard-label">餐食作法</div><div class="hcard-sub">${FOOD_RECIPES.length} 道食譜</div></div>
+    <div class="hcard" onclick="go('favourites')"><div class="hcard-icon">⭐</div><div class="hcard-label">我的收藏</div><div class="hcard-sub">${favCount} 個已收藏</div></div>
+  </div>`;
+}
+
+// ─── RECIPE LIST ─────────────────────────────────────────
+function recipeGroup(r){
+  const menuNames=['陳美鳳','鄧荔君','蔡琴','張曼玉','王菲','萬芳'];
+  if(menuNames.includes(r.name)) return '菜單調酒';
+  if(r.cat==='特調') return '特調';
+  return '經典調酒';
+}
+function renderRecipeList(){
+  const q=APP.search.toLowerCase();
+  const filtered=RECIPES.filter(r=>!q||r.name.toLowerCase().includes(q)||r.base.toLowerCase().includes(q));
+  const groups=['經典調酒','菜單調酒','特調'];
+  const groupIcons={'經典調酒':'🍸','菜單調酒':'🎤','特調':'✦'};
+  let body='';
+  groups.forEach(g=>{
+    const items=filtered.filter(r=>recipeGroup(r)===g);
+    if(items.length===0)return;
+    body+=`<div class="group-label">${groupIcons[g]} ${g}　<span class="group-count">${items.length}</span></div>`;
+    body+=items.map(r=>`
+    <div class="rcard" onclick="goDetail('recipe',${r.id})">
+      <div class="rcard-img">${r.img?`<img src="${r.img}" alt="">`:'🍸'}</div>
+      <div class="rcard-body">
+        <div class="rcard-name">${esc(r.name)}</div>
+        <div class="rcard-meta">${r.name_zh?esc(r.name_zh)+' · ':''}${esc(r.base)}</div>
+        <div class="rcard-tags"><span class="tag ac">${esc(r.method.label)}</span><span class="tag">${esc(r.glass.label)}</span>${r.fav?'<span class="tag ac">⭐</span>':''}</div>
+      </div>
+    </div>`).join('');
+  });
+  if(!body) body='<div class="empty">沒有找到配方</div>';
+  return `<div class="topbar"><button class="back-btn" onclick="go('home')">←</button><span class="topbar-title">調酒作法</span><button class="icon-btn" onclick="openAddRecipeModal()">＋</button></div>
+  <div class="search-bar"><input placeholder="搜尋配方..." oninput="APP.search=this.value;render(false)" value="${esc(APP.search)}"></div>
+  <div class="list-body">${body}</div>`;
+}
+
+// ─── RECIPE DETAIL ───────────────────────────────────────
+function renderRecipeDetail(){
+  const r=RECIPES.find(x=>x.id===APP.detailId);if(!r)return '';
+  const bf=t=>t?BOTTLES.filter(b=>b.cat===t):[];
+  return `<div class="topbar"><button class="back-btn" onclick="goBack()">←</button><span class="topbar-title">${esc(r.name)}</span><button class="icon-btn" onclick="openEditRecipeModal(${r.id})">✎</button></div>
+  <div class="det-img">${r.img?`<img src="${r.img}" alt="">`:'🍸'}
+    <label class="upload-btn" for="imgup-r${r.id}">📷 上傳</label>
+    <input type="file" id="imgup-r${r.id}" accept="image/*" style="display:none" onchange="handleImgUpload(event,'recipe',${r.id})">
+  </div>
+  <div class="det-body">
+    <div class="det-name">${esc(r.name)}${r.name_zh?` <span style="font-size:16px;color:var(--accent);font-weight:400">${esc(r.name_zh)}</span>`:''}</div>
+    <div class="det-meta"><span class="badge">${esc(r.cat)}</span><span style="font-size:12px;color:var(--muted)">${esc(r.base)}</span></div>
+    <div class="det-desc">${esc(r.desc)}</div>
+    <div class="sec">材料 / Ingredients</div>
+    <div class="ingr-list">${r.ingr.map((ing,idx)=>{
+      const opts=bf(ing.type);
+      const sel=ing.sel?BOTTLES.find(b=>b.id===ing.sel):null;
+      let bars='';if(sel)for(let i=1;i<=5;i++)bars+=`<div class="sbar${i<=sel.strength?' on':''}"></div>`;
+      return `<div class="ingr-block">
+        <div class="ingr-main"><div><div class="ingr-zh">${esc(ing.zh)}</div><div class="ingr-en">${esc(ing.en)}</div></div><div class="ingr-amt">${esc(ing.a)}</div></div>
+        ${opts.length?`<div class="bottle-row"><label>酒櫃</label>
+          <select onchange="setBottleSel(${r.id},${idx},this.value)">
+            <option value="">選擇酒瓶</option>
+            ${opts.map(b=>`<option value="${b.id}"${ing.sel===b.id?' selected':''}>${esc(b.name)} ${b.abv}%</option>`).join('')}
+          </select></div>
+        ${sel?`<div class="bottle-info"><div class="bi-top"><div><span class="abv-num" style="color:${abvColor(sel.abv)}">${sel.abv}</span><span class="abv-sub"> % ABV</span></div><div class="sbar-row">${bars}</div></div><div class="flavor-row">${sel.flavor.map(f=>`<span class="ftag">${esc(f)}</span>`).join('')}</div></div>`:''}
+        `:''}
+      </div>`;}).join('')}</div>
+    <div class="sec">調製方式 &amp; 杯型</div>
+    <div class="mg-row">
+      <div class="mg-card"><div class="mgl">調製方式</div><div class="mgv">${esc(r.method.label)}</div><div class="mgs">${esc(r.method.sub)}</div></div>
+      <div class="mg-card"><div class="mgl">杯型</div><div class="mgv">${esc(r.glass.label)}</div><div class="mgs">${esc(r.glass.sub)}</div></div>
+    </div>
+    <div class="sec">步驟 / Steps</div>
+    <div class="steps">${r.steps.map((s,i)=>`<div class="step-row"><span class="snum">${i+1}</span><span>${esc(s)}</span></div>`).join('')}</div>
+    <div class="garnish-card"><div class="gtitle">裝飾 / Garnish</div>
+      ${r.garnish.map(g=>`<div class="gi"><div class="gdot"></div><div><div>${esc(g.item)}</div><div class="gnote">${esc(g.note)}</div></div></div>`).join('')}
+    </div>
+    <div class="action-row">
+      <button class="btn-fav${r.fav?' on':''}" onclick="toggleFav('recipe',${r.id})">${r.fav?'⭐ 已收藏':'☆ 加入收藏'}</button>
+      <button class="btn-edit-det" onclick="openEditRecipeModal(${r.id})">✎</button>
+      <button class="btn-del" onclick="deleteItem('recipe',${r.id})">🗑</button>
+    </div>
+  </div>`;
+}
+
+// ─── CABINET ─────────────────────────────────────────────
+function renderCabinet(){
+  return `<div class="topbar"><button class="back-btn" onclick="go('home')">←</button><span class="topbar-title">酒櫃</span><button class="icon-btn" onclick="openAddBottleModal()">＋</button></div>
+  <div class="bottle-grid">${BOTTLES.map(b=>`
+    <div class="bc">
+      <div class="bc-img">${b.img?`<img src="${b.img}" alt="">`:'🍾'}
+        <label class="bc-upload" for="bcup-${b.id}">📷</label>
+        <input type="file" id="bcup-${b.id}" accept="image/*" style="display:none" onchange="handleImgUpload(event,'bottle',${b.id})">
+      </div>
+      <div class="bc-body">
+        <div class="bc-name">${esc(b.name)}</div>
+        <div class="bc-en">${esc(b.en)}</div>
+        <div class="bc-abv">${b.abv}% ABV</div>
+        <div class="bc-tags">${b.flavor.map(f=>`<span class="bc-tag">${esc(f)}</span>`).join('')}</div>
+      </div>
+    </div>`).join('')}</div>`;
+}
+
+// ─── FAVOURITES ──────────────────────────────────────────
+function renderFavourites(){
+  const favR=RECIPES.filter(r=>r.fav);
+  const favM=MOCKTAILS.filter(r=>r.fav);
+  const favF=FOOD_RECIPES.filter(r=>r.fav);
+  const favS=SPECIALS.filter(s=>s.fav);
+  if(!favR.length&&!favF.length&&!favS.length&&!favM.length) return `<div class="topbar"><button class="back-btn" onclick="go('home')">←</button><span class="topbar-title">我的收藏</span></div><div class="empty" style="margin-top:40px">⭐<br><br>還沒有收藏任何東西</div>`;
+  return `<div class="topbar"><button class="back-btn" onclick="go('home')">←</button><span class="topbar-title">我的收藏</span></div>
+  <div class="fav-list">
+    ${favR.length?`<div class="fav-section-label">調酒配方</div>${favR.map(r=>`
+      <div class="rcard" onclick="APP.nav='cocktails';goDetail('recipe',${r.id})">
+        <div class="rcard-img">${r.img?`<img src="${r.img}" alt="">`:'🍸'}</div>
+        <div class="rcard-body"><div class="rcard-name">${esc(r.name)}</div><div class="rcard-meta">${esc(r.base)}</div><div class="rcard-tags"><span class="tag ac">${esc(r.method.label)}</span></div></div>
+      </div>`).join('')}`:''}
+    ${favF.length?`<div class="fav-section-label" style="margin-top:8px">餐食食譜</div>${favF.map(r=>`
+      <div class="rcard" onclick="APP.nav='food';goDetail('food',${r.id})">
+        <div class="rcard-img">${r.img?`<img src="${r.img}" alt="">`:'🍽'}</div>
+        <div class="rcard-body"><div class="rcard-name">${esc(r.name)}</div><div class="rcard-meta">${esc(r.cat)}</div></div>
+      </div>`).join('')}`:''}
+    ${favM.length?`<div class="fav-section-label" style="margin-top:8px">無酒精飲品</div>${favM.map(r=>`
+      <div class="rcard" onclick="APP.nav='mocktail';goDetail('mocktail',${r.id})">
+        <div class="rcard-img">${r.img?`<img src="${r.img}" alt="">`:'🌿'}</div>
+        <div class="rcard-body"><div class="rcard-name">${esc(r.name)}</div><div class="rcard-meta">${esc(r.cat)}</div></div>
+      </div>`).join('')}`:''}
+    ${favS.length?`<div class="fav-section-label" style="margin-top:8px">特調配方</div><div class="saved-list">${favS.map(s=>`
+      <div class="si" onclick="APP.nav='special';APP.sp.result=s;render(true)">
+        <div><div class="si-name">${esc(s.name)}</div><div class="si-meta">${(s.flavor_tags||[]).slice(0,3).join(' · ')}</div></div>
+        <span style="color:var(--muted)">›</span>
+      </div>`).join('')}</div>`:''}
+  </div>`;
+}
+
+// ─── FOOD LIST ───────────────────────────────────────────
+function renderFoodList(){
+  const q=APP.search.toLowerCase();
+  const list=FOOD_RECIPES.filter(r=>!q||r.name.toLowerCase().includes(q));
+  return `<div class="topbar"><button class="back-btn" onclick="go('home')">←</button><span class="topbar-title">餐食作法</span><button class="icon-btn" onclick="openAddFoodModal()">＋</button></div>
+  <div class="search-bar"><input placeholder="搜尋食譜..." oninput="APP.search=this.value;render(false)" value="${esc(APP.search)}"></div>
+  <div class="list-body">${list.length===0?'<div class="empty">還沒有食譜，點 ＋ 新增</div>':list.map(r=>`
+    <div class="rcard" onclick="goDetail('food',${r.id})">
+      <div class="rcard-img">${r.img?`<img src="${r.img}" alt="">`:'🍽'}</div>
+      <div class="rcard-body">
+        <div class="rcard-name">${esc(r.name)}</div>
+        <div class="rcard-meta">${esc(r.cat)}${r.pairing?' · 搭配：'+esc(r.pairing):''}</div>
+        ${r.fav?'<div class="rcard-tags"><span class="tag ac">⭐</span></div>':''}
+      </div>
+    </div>`).join('')}</div>`;
+}
+
+// ─── FOOD DETAIL ─────────────────────────────────────────
+function renderFoodDetail(){
+  const r=FOOD_RECIPES.find(x=>x.id===APP.detailId);if(!r)return '';
+  return `<div class="topbar"><button class="back-btn" onclick="goBack()">←</button><span class="topbar-title">${esc(r.name)}</span><button class="icon-btn" onclick="openEditFoodModal(${r.id})">✎</button></div>
+  <div class="det-img">${r.img?`<img src="${r.img}" alt="">`:'🍽'}
+    <label class="upload-btn" for="imgup-f${r.id}">📷 上傳</label>
+    <input type="file" id="imgup-f${r.id}" accept="image/*" style="display:none" onchange="handleImgUpload(event,'food',${r.id})">
+  </div>
+  <div class="det-body">
+    <div class="det-name">${esc(r.name)}</div>
+    <div class="det-meta"><span class="badge">${esc(r.cat)}</span>${r.pairing?`<span style="font-size:12px;color:var(--muted)">搭配：${esc(r.pairing)}</span>`:''}</div>
+    <div class="det-desc">${esc(r.desc)}</div>
+    <div class="sec">食材</div>
+    <div class="ingr-list">${(r.ingr||[]).map(i=>`<div class="ingr-block"><div class="ingr-main"><div class="ingr-zh">${esc(i.item)}</div><div class="ingr-amt">${esc(i.amt)}</div></div></div>`).join('')}</div>
+    <div class="sec">步驟</div>
+    <div class="steps">${(r.steps||[]).map((s,i)=>`<div class="step-row"><span class="snum">${i+1}</span><span>${esc(s)}</span></div>`).join('')}</div>
+    <div class="action-row">
+      <button class="btn-fav${r.fav?' on':''}" onclick="toggleFav('food',${r.id})">${r.fav?'⭐ 已收藏':'☆ 加入收藏'}</button>
+      <button class="btn-edit-det" onclick="openEditFoodModal(${r.id})">✎</button>
+      <button class="btn-del" onclick="deleteItem('food',${r.id})">🗑</button>
+    </div>
+  </div>`;
+}
+
+// ─── SPECIAL ─────────────────────────────────────────────
+function renderSpecial(){
+  const sp=APP.sp;const cats=allCats();
+  return `<div class="topbar"><button class="back-btn" onclick="go('home')">←</button><span class="topbar-title">特調專區</span></div>
+  <div class="sp-body">
+    <div><div class="sl">選擇基酒</div>
+      <div class="cat-grid">${cats.map(c=>`<div class="cat-card${sp.selCat===c?' on':''}" onclick="spSetCat('${c}')">
+        <div style="font-size:20px">🍾</div><div class="cc-name">${esc(c)}</div><div class="cc-count">${catBottles(c).length} 瓶在庫</div>
+      </div>`).join('')}</div>
+    </div>
+    ${sp.selCat?`<div><div class="sl">酒櫃庫存</div><div style="display:flex;flex-direction:column;gap:5px">
+      ${catBottles(sp.selCat).map(b=>`<div style="background:var(--bg3);border:0.5px solid var(--border);border-radius:8px;padding:9px 12px;display:flex;justify-content:space-between;align-items:center">
+        <div><div style="font-size:13px;font-weight:500">${esc(b.name)}</div><div style="font-size:11px;color:var(--muted)">${esc(b.en)}</div></div>
+        <div style="text-align:right"><div style="font-size:12px;color:var(--accent)">${b.abv}% ABV</div><div style="font-size:10px;color:var(--muted);margin-top:2px">${b.flavor.slice(0,2).join('・')}</div></div>
+      </div>`).join('')}
+    </div></div>`:''}
+    <div class="divider"></div>
+    <div><div class="sl">客人喜好</div><div style="display:flex;flex-direction:column;gap:8px">
+      ${PREFS.map(p=>`<div class="pref-group"><div class="pref-title">${p.label}</div>
+        <div class="pref-opts">${p.opts.map(o=>`<div class="popt${sp.prefs[p.key]===o?' on':''}" onclick="spSetPref('${p.key}','${o}')">${o}</div>`).join('')}</div>
+      </div>`).join('')}
+    </div></div>
+    ${sp.step==='copy'?`
+    <div style="background:var(--bg2);border:0.5px solid var(--a3);border-radius:var(--r);padding:14px;display:flex;flex-direction:column;gap:10px">
+      <div style="font-size:12px;color:var(--accent);font-weight:500">第一步：複製這段請求</div>
+      <textarea id="sp-req-text" readonly style="width:100%;background:var(--bg3);border:0.5px solid var(--border);border-radius:8px;color:var(--text);padding:9px;font-size:11px;font-family:monospace;resize:none;min-height:80px;line-height:1.4">${sp._reqText||''}</textarea>
+      <button id="sp-copy-btn" onclick="spCopyText()" style="width:100%;background:var(--bg3);border:0.5px solid var(--a3);border-radius:8px;color:var(--accent);font-size:13px;font-weight:500;padding:10px;cursor:pointer;font-family:inherit">複製內容</button>
+      <div style="font-size:11px;color:var(--muted);text-align:center">複製後貼到 Claude 對話框送出</div>
+      <button onclick="spCopyDone()" style="width:100%;background:var(--accent);border:none;border-radius:8px;color:#1a1200;font-size:13px;font-weight:500;padding:10px;cursor:pointer;font-family:inherit">我已送出，下一步 →</button>
+    </div>
+    `:sp.step==='paste'?`
+    <div style="background:var(--bg2);border:0.5px solid var(--a3);border-radius:var(--r);padding:14px;display:flex;flex-direction:column;gap:10px">
+      <div style="font-size:12px;color:var(--accent);font-weight:500">第二步：貼上 Claude 的回覆</div>
+      <textarea id="sp-paste-area" placeholder="把 Claude 的完整回覆貼在這裡..." style="width:100%;background:var(--bg3);border:0.5px solid var(--border);border-radius:8px;color:var(--text);padding:9px;font-size:12px;font-family:monospace;resize:none;min-height:120px;line-height:1.4;outline:none"></textarea>
+      <button onclick="spSubmitPaste()" style="width:100%;background:var(--accent);border:none;border-radius:8px;color:#1a1200;font-size:13px;font-weight:500;padding:11px;cursor:pointer;font-family:inherit">生成配方 ✓</button>
+      <button onclick="APP.sp.step='copy';render(false)" style="width:100%;background:var(--bg3);border:0.5px solid var(--border);border-radius:8px;color:var(--muted);font-size:12px;padding:9px;cursor:pointer;font-family:inherit">← 返回複製</button>
+    </div>
+    `:`<button class="btn-gen" ${sp.selCat?'':'disabled'} onclick="spGenerate()">幫我調一杯</button>`}
+  </div>`;
+}
+
+function renderSpecialResult(){
+  const sp=APP.sp;const r=sp.result;
+  if(!r||r.error) return `<div class="topbar"><button class="back-btn" onclick="goBack()">←</button><span class="topbar-title">發生錯誤</span></div>
+  <div class="sp-body"><div class="waiting-box">解析失敗，請返回重試</div><button class="btn-gen" onclick="goBack()">返回重試</button></div>`;
+  const rec=r.base_bottle?BOTTLES.find(b=>b.name.includes(r.base_bottle.slice(0,3))||r.base_bottle.includes(b.name.slice(0,3))):null;
+  const hasTweaks=Object.keys(sp.tweaks).length>0;
+  const isSaved=SPECIALS.some(s=>s===r||s._id===r._id);
+  return `<div class="topbar"><button class="back-btn" onclick="goBack()">←</button><span class="topbar-title">特調配方</span></div>
+  <div class="sp-body">
+    <div class="result-card">
+      <div class="rh">
+        <div style="flex:1;min-width:0"><div class="rname">${esc(r.name||'特調')}</div><div class="ren">${esc(r.name_en||'')}</div>
+          <div class="rtags">${(r.flavor_tags||[]).map(t=>`<span class="rtag">${esc(t)}</span>`).join('')}</div></div>
+        <button class="btn-save${isSaved?' saved':''}" onclick="spSave()">${isSaved?'✓ 已儲存':'儲存'}</button>
+      </div>
+      <div class="rb">
+        ${r.concept?`<div class="concept-box">${esc(r.concept)}</div>`:''}
+        <div><div class="sl">建議使用</div>
+          <div style="background:var(--bg3);border:0.5px solid var(--a3);border-radius:9px;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;gap:8px">
+            <div style="display:flex;align-items:center;gap:10px;min-width:0">
+              <div style="font-size:20px">🍶</div>
+              <div><div style="font-size:14px;font-weight:500;color:var(--accent)">${esc(r.base_bottle||sp.selCat||'')}</div><div style="font-size:11px;color:var(--muted);margin-top:2px">${rec?esc(rec.en):''}</div></div>
+            </div>
+            ${rec?`<div style="text-align:right;flex-shrink:0"><div style="font-size:13px;color:var(--accent)">${rec.abv}% ABV</div><div style="font-size:10px;color:var(--muted);margin-top:1px">${rec.flavor.slice(0,2).join('・')}</div></div>`:''}
+          </div>
+          ${r.base_reason?`<div style="font-size:11px;color:var(--muted);margin-top:4px">選這瓶的原因：${esc(r.base_reason)}</div>`:''}
+        </div>
+        <div><div class="sl">材料</div>
+          ${(r.ingredients||[]).map(i=>`<div class="ingr-row2"><div><div class="iz">${esc(i.zh)}</div><div class="ien">${esc(i.en)}</div></div><div class="iamt">${esc(i.amount)}</div></div>`).join('')}
+        </div>
+        <div><div class="sl">調製方式 &amp; 杯型</div><div class="mg2-row">
+          <div class="mg2-card"><div class="mgl">調製方式</div><div class="mgv">${esc(r.method||'—')}</div><div class="mgs">${esc(r.method_note||'')}</div></div>
+          <div class="mg2-card"><div class="mgl">杯型</div><div class="mgv">${esc((r.glass||'—').split('/')[0].trim())}</div><div class="mgs">${esc(r.glass_note||'')}</div></div>
+        </div></div>
+        <div><div class="sl">步驟</div><div class="steps">
+          ${(r.steps||[]).map((s,i)=>`<div class="step-row"><span class="snum">${i+1}</span><span>${esc(s)}</span></div>`).join('')}
+        </div></div>
+        ${(r.garnish||[]).length?`<div class="garnish-card" style="margin-bottom:0"><div class="gtitle">裝飾 / Garnish</div>
+          ${r.garnish.map(g=>`<div class="gi"><div class="gdot"></div><div><div>${esc(g.item)}</div><div class="gnote">${esc(g.note||'')}</div></div></div>`).join('')}
+        </div>`:''}
+        ${r.bartender_note?`<div><div class="sl">調酒師備註</div><div class="note-box">${esc(r.bartender_note)}</div></div>`:''}
+        <button class="btn-gen" onclick="spRegenerate()">↺ 重新生成</button>
+      </div>
+    </div>
+    <div class="tweak-section">
+      <div class="tweak-hd"><span>喝起來感覺如何？</span><small> 選需微調的部分</small></div>
+      <div class="tweak-bd">
+        ${TWEAK_DIMS.map(d=>`<div class="tweak-row">
+          <div class="tweak-lbl">${d.label}</div>
+          <div class="tweak-btns">
+            <div class="tbtn reduce${sp.tweaks[d.key]==='reduce'?' on':''}" onclick="spTweak('${d.key}','reduce')">↓ 太強了</div>
+            <div class="tbtn boost${sp.tweaks[d.key]==='boost'?' on':''}" onclick="spTweak('${d.key}','boost')">↑ 太弱了</div>
+          </div>
+        </div>`).join('')}
+        ${hasTweaks?`<button class="btn-outline" onclick="spAskTweak()">✦ 幫我調整這杯</button>`:''}
+        ${sp.showTweak&&sp.tweakAdv?`<div class="tweak-result-box">
+          <div style="font-size:10px;color:var(--accent);font-weight:500;letter-spacing:.5px;margin-bottom:4px">調整建議</div>
+          ${sp.tweakAdv.split('\n').filter(l=>l.trim()).map(line=>`<div class="tweak-tip">
+            <div class="tip-dot ${line.includes('降')||line.includes('減')||line.includes('少')?'r':'b'}"></div>
+            <div>${line.replace(/^[-•·]\s*/,'')}</div>
+          </div>`).join('')}
+        </div>`:''}
+      </div>
+    </div>
+  </div>`;
+}
+
+
+// ─── MOCKTAIL LIST ───────────────────────────────────────
+function renderMocktailList(){
+  const q=APP.search.toLowerCase();
+  const list=MOCKTAILS.filter(r=>!q||r.name.toLowerCase().includes(q)||r.cat.toLowerCase().includes(q));
+  return `<div class="topbar"><button class="back-btn" onclick="go('home')">←</button><span class="topbar-title">無酒精作法</span></div>
+  <div class="search-bar"><input placeholder="搜尋飲品..." oninput="APP.search=this.value;render(false)" value="${esc(APP.search)}"></div>
+  <div class="list-body">
+    <div class="rcard" style="border-color:var(--a3);background:var(--a2)" onclick="APP.mocktailTool=true;render(true)">
+      <div class="rcard-img" style="background:var(--a2)">🧪</div>
+      <div class="rcard-body">
+        <div class="rcard-name" style="color:var(--accent)">配方比例查詢工具</div>
+        <div class="rcard-meta">選A/B/C材料，馬上看比例（共125組配方）</div>
+      </div>
+    </div>
+    ${list.length===0?'<div class="empty">沒有找到</div>':list.map(r=>`
+    <div class="rcard" onclick="goDetail('mocktail',${r.id})">
+      <div class="rcard-img">${r.img?`<img src="${r.img}" alt="">`:'🌿'}</div>
+      <div class="rcard-body">
+        <div class="rcard-name">${esc(r.name)}</div>
+        <div class="rcard-meta">${esc(r.cat)}</div>
+        ${r.fav?'<div class="rcard-tags"><span class="tag ac">⭐</span></div>':''}
+      </div>
+    </div>`).join('')}</div>`;
+}
+
+// ─── MOCKTAIL FORMULA TOOL ───────────────────────────────
+function mfUniqueNames(key){
+  const set=new Set();
+  MOCKTAIL_FORMULAS.forEach(f=>{ if(f[key].n) set.add(f[key].n); });
+  return [...set].sort();
+}
+function mfAllAName(){ return mfUniqueNames('a'); }
+function mfAllBName(){
+  const sel=APP.mocktailSel;
+  const set=new Set();
+  MOCKTAIL_FORMULAS.forEach(f=>{ if((!sel.a||f.a.n===sel.a) && f.b.n) set.add(f.b.n); });
+  return [...set].sort();
+}
+function mfAllCName(){
+  const sel=APP.mocktailSel;
+  const set=new Set();
+  MOCKTAIL_FORMULAS.forEach(f=>{ if((!sel.a||f.a.n===sel.a)&&(!sel.b||f.b.n===sel.b) && f.c.n) set.add(f.c.n); });
+  return [...set].sort();
+}
+function mfMatches(){
+  const sel=APP.mocktailSel;
+  if(!sel.a&&!sel.b&&!sel.c) return [];
+  return MOCKTAIL_FORMULAS.filter(f=>
+    (!sel.a||f.a.n===sel.a) && (!sel.b||f.b.n===sel.b) && (!sel.c||f.c.n===sel.c)
+  );
+}
+function mfSetSel(level,val){
+  APP.mocktailSel[level]=val;
+  if(level==='a'){APP.mocktailSel.b='';APP.mocktailSel.c='';}
+  if(level==='b'){APP.mocktailSel.c='';}
+  render(false);
+}
+function mfReset(){APP.mocktailSel={a:'',b:'',c:''};render(false);}
+function renderMocktailFormulaTool(){
+  const sel=APP.mocktailSel;
+  const matches=mfMatches();
+  const aOpts=mfAllAName(), bOpts=mfAllBName(), cOpts=mfAllCName();
+  return `<div class="topbar"><button class="back-btn" onclick="APP.mocktailTool=false;render(true)">←</button><span class="topbar-title">配方比例查詢</span></div>
+  <div class="sp-body">
+    <div class="pref-group">
+      <div class="pref-title">A 材料</div>
+      <select onchange="mfSetSel('a',this.value)" style="width:100%;background:var(--bg3);border:0.5px solid var(--border);border-radius:8px;color:var(--text);padding:9px 11px;font-size:13px;font-family:inherit">
+        <option value="">— 不限 —</option>
+        ${aOpts.map(n=>`<option value="${esc(n)}"${sel.a===n?' selected':''}>${esc(n)}</option>`).join('')}
+      </select>
+    </div>
+    <div class="pref-group">
+      <div class="pref-title">B 材料</div>
+      <select onchange="mfSetSel('b',this.value)" style="width:100%;background:var(--bg3);border:0.5px solid var(--border);border-radius:8px;color:var(--text);padding:9px 11px;font-size:13px;font-family:inherit">
+        <option value="">— 不限 —</option>
+        ${bOpts.map(n=>`<option value="${esc(n)}"${sel.b===n?' selected':''}>${esc(n)}</option>`).join('')}
+      </select>
+    </div>
+    <div class="pref-group">
+      <div class="pref-title">C 材料</div>
+      <select onchange="mfSetSel('c',this.value)" style="width:100%;background:var(--bg3);border:0.5px solid var(--border);border-radius:8px;color:var(--text);padding:9px 11px;font-size:13px;font-family:inherit">
+        <option value="">— 不限 —</option>
+        ${cOpts.map(n=>`<option value="${esc(n)}"${sel.c===n?' selected':''}>${esc(n)}</option>`).join('')}
+      </select>
+    </div>
+    ${(sel.a||sel.b||sel.c)?`<button class="btn-outline" onclick="mfReset()">清除選擇</button>`:''}
+    <div class="sl">符合配方　<span style="color:var(--muted);text-transform:none">共 ${matches.length} 組</span></div>
+    ${matches.length===0?'<div class="empty">請選擇至少一項材料</div>':matches.map(f=>`
+      <div class="result-card">
+        <div class="rh"><div style="flex:1"><div class="rname" style="font-size:15px">配方 #${f.id}</div><div class="ren">${esc(f.method)}</div></div></div>
+        <div class="rb" style="padding-top:10px">
+          <div class="ingr-row2"><div><div class="iz">A・${esc(f.a.n)}</div></div><div class="iamt">${esc(f.a.amt)}${esc(f.a.u)}</div></div>
+          <div class="ingr-row2"><div><div class="iz">B・${esc(f.b.n)}</div></div><div class="iamt">${esc(f.b.amt)}${esc(f.b.u)}</div></div>
+          ${f.c.n?`<div class="ingr-row2"><div><div class="iz">C・${esc(f.c.n)}</div></div><div class="iamt">${esc(f.c.amt)}${esc(f.c.u)}</div></div>`:''}
+          ${f.acid.type&&f.acid.type!=='-'?`<div class="ingr-row2"><div><div class="iz">${esc(f.acid.type==='acid'?'Acid 酸液':f.acid.type==='lemon'?'Lemon 檸檬汁':f.acid.type)}</div></div><div class="iamt">${esc(f.acid.amt)}${esc(f.acid.u)}</div></div>`:''}
+          ${f.fill.n?`<div class="ingr-row2"><div><div class="iz">填充物・${esc(f.fill.n)}</div></div><div class="iamt">${esc(f.fill.amt)}${esc(f.fill.u)}</div></div>`:''}
+        </div>
+      </div>`).join('')}
+  </div>`;
+}
+function renderMocktailDetail(){
+  const r=MOCKTAILS.find(x=>x.id===APP.detailId);if(!r)return '';
+  return `<div class="topbar"><button class="back-btn" onclick="goBack()">←</button><span class="topbar-title">${esc(r.name)}</span></div>
+  <div class="det-img">${r.img?`<img src="${r.img}" alt="">`:'🌿'}
+    <label class="upload-btn" for="imgup-m${r.id}">📷 上傳</label>
+    <input type="file" id="imgup-m${r.id}" accept="image/*" style="display:none" onchange="handleMocktailImg(event,${r.id})">
+  </div>
+  <div class="det-body">
+    <div class="det-name">${esc(r.name)}</div>
+    <div class="det-meta"><span class="badge">${esc(r.cat)}</span>${r.pairing?`<span style="font-size:12px;color:var(--muted)">搭配：${esc(r.pairing)}</span>`:''}</div>
+    <div class="det-desc">${esc(r.desc)}</div>
+    <div class="sec">材料</div>
+    <div class="ingr-list">${(r.ingr||[]).map(i=>`<div class="ingr-block"><div class="ingr-main"><div class="ingr-zh">${esc(i.item)}</div><div class="ingr-amt">${esc(i.amt)}</div></div></div>`).join('')}</div>
+    <div class="sec">步驟</div>
+    <div class="steps">${(r.steps||[]).map((s,i)=>`<div class="step-row"><span class="snum">${i+1}</span><span>${esc(s)}</span></div>`).join('')}</div>
+    <div class="action-row">
+      <button class="btn-fav${r.fav?' on':''}" onclick="toggleMocktailFav(${r.id})">${r.fav?'⭐ 已收藏':'☆ 加入收藏'}</button>
+    </div>
+  </div>`;
+}
+function handleMocktailImg(e,id){
+  const f=e.target.files[0];if(!f)return;
+  const rd=new FileReader();rd.onload=ev=>{const r=MOCKTAILS.find(x=>x.id===id);if(r){r.img=ev.target.result;render(false);}};rd.readAsDataURL(f);
+}
+function toggleMocktailFav(id){const r=MOCKTAILS.find(x=>x.id===id);if(r){r.fav=!r.fav;render(false);}}
+
+function renderComing(title,icon){
+  return `<div class="topbar"><button class="back-btn" onclick="go('home')">←</button><span class="topbar-title">${title}</span></div>
+  <div class="coming"><div>${icon}</div>酒譜提供後幫你填進來</div>`;
+}
+
+// ─── ACTIONS ─────────────────────────────────────────────
+function handleImgUpload(e,type,id){
+  const f=e.target.files[0];if(!f)return;
+  const r2=new FileReader();r2.onload=ev=>{
+    if(type==='recipe'){const rec=RECIPES.find(x=>x.id===id);if(rec)rec.img=ev.target.result;}
+    else if(type==='bottle'){const b=BOTTLES.find(x=>x.id===id);if(b)b.img=ev.target.result;}
+    else if(type==='food'){const rec=FOOD_RECIPES.find(x=>x.id===id);if(rec)rec.img=ev.target.result;}
+    render(false);
+  };r2.readAsDataURL(f);
+}
+function setBottleSel(rid,idx,val){
+  const rec=RECIPES.find(r=>r.id===rid);
+  if(rec)rec.ingr[idx].sel=val?parseInt(val):null;
+  render(false);
+}
+function toggleFav(type,id){
+  let item;
+  if(type==='recipe') item=RECIPES.find(x=>x.id===id);
+  else if(type==='food') item=FOOD_RECIPES.find(x=>x.id===id);
+  else if(type==='special') item=SPECIALS.find(x=>x.id===id);
+  if(item){item.fav=!item.fav;render(false);}
+}
+function deleteItem(type,id){
+  if(!confirm('確定要刪除？'))return;
+  if(type==='recipe'){RECIPES.splice(RECIPES.findIndex(x=>x.id===id),1);}
+  else if(type==='food'){FOOD_RECIPES.splice(FOOD_RECIPES.findIndex(x=>x.id===id),1);}
+  goBack();
+}
+function spSetCat(cat){APP.sp.selCat=APP.sp.selCat===cat?null:cat;render(false);}
+function spSetPref(k,v){APP.sp.prefs[k]=APP.sp.prefs[k]===v?null:v;render(false);}
+function spTweak(dim,dir){
+  APP.sp.tweaks[dim]=APP.sp.tweaks[dim]===dir?undefined:dir;
+  if(!APP.sp.tweaks[dim])delete APP.sp.tweaks[dim];
+  APP.sp.showTweak=false;render(false);
+}
+function spAskTweak(){
+  const sp=APP.sp;const tips=[];
+  Object.entries(sp.tweaks).forEach(([k,v])=>{
+    const t=TWEAK_TIPS[k]?.[v];
+    const d=TWEAK_DIMS.find(x=>x.key===k);
+    if(t) tips.push(`【${d.label}${v==='reduce'?'降低':'加強'}】\n${t.join('\n')}`);
+  });
+  sp.tweakAdv=tips.join('\n\n');sp.showTweak=true;render(false);
+}
+function spSave(){
+  const r=APP.sp.result;if(!r)return;
+  if(SPECIALS.some(s=>s===r||s._id===r._id))return;
+  r._id=Date.now();r.fav=false;
+  SPECIALS.unshift(r);render(false);
+}
+function spRegenerate(){APP.sp.result=null;APP.sp.tweaks={};APP.sp.tweakAdv=null;APP.sp.showTweak=false;render(true);}
+function spGenerate(){
+  const sp=APP.sp;if(!sp.selCat)return;
+  const bottles=catBottles(sp.selCat);
+  const pLines=PREFS.map(p=>sp.prefs[p.key]?`${p.label}：${sp.prefs[p.key]}`:null).filter(Boolean).join('、');
+  sp._reqText=`【特調生成請求】基酒：${sp.selCat} | 喜好：${pLines||'自由發揮'} | 酒櫃：${bottles.map(b=>b.name).join('、')}\n\n請以 JSON 格式回覆一款特調配方（包含 name、name_en、concept、base_bottle、base_reason、method、method_note、glass、glass_note、ingredients陣列、steps陣列、garnish陣列、flavor_tags陣列、bartender_note）。請在 JSON 前後加上 ===JSON_START=== 和 ===JSON_END=== 標記。`;
+  sp.step='copy';
+  render(true);
+}
+function spCopyDone(){APP.sp.step='paste';render(false);}
+function spSubmitPaste(){
+  const ta=document.getElementById('sp-paste-area');
+  if(!ta||!ta.value.trim())return;
+  try{
+    const txt=ta.value;
+    const s=txt.indexOf('===JSON_START===');const e=txt.indexOf('===JSON_END===');
+    const cleaned=s>=0&&e>s?txt.slice(s+16,e).trim():txt.slice(txt.indexOf('{'),txt.lastIndexOf('}')+1);
+    APP.sp.result=JSON.parse(cleaned);
+  }catch(err){APP.sp.result={error:true};}
+  APP.sp.step=null;render(true);
+}
+function spCopyText(){
+  const el=document.getElementById('sp-req-text');if(!el)return;
+  el.select();el.setSelectionRange(0,99999);
+  try{document.execCommand('copy');}catch(e){}
+  if(navigator.clipboard)navigator.clipboard.writeText(el.value).catch(()=>{});
+  const btn=document.getElementById('sp-copy-btn');
+  if(btn){btn.textContent='✓ 已複製！';btn.style.background='#2a4a2a';btn.style.color='#4a9a6a';btn.style.borderColor='#4a9a6a';}
+}
+
+// ─── MODALS ──────────────────────────────────────────────
+function closeModal(){document.getElementById('modal-root').innerHTML='';}
+function showModal(html){document.getElementById('modal-root').innerHTML=`<div class="modal-bg" onclick="if(event.target===this)closeModal()">${html}</div>`;}
+
+// Add Bottle
+function openAddBottleModal(editId){
+  const b=editId?BOTTLES.find(x=>x.id===editId):{};
+  showModal(`<div class="modal">
+    <div class="modal-title">${editId?'編輯酒瓶':'新增酒瓶'}</div>
+    <div class="field"><label>中文名稱</label><input id="m-name" value="${esc(b.name||'')}"></div>
+    <div class="field"><label>英文名稱</label><input id="m-en" value="${esc(b.en||'')}"></div>
+    <div class="field"><label>類型</label>
+      <select id="m-cat">
+        ${['威士忌','琴酒','蘭姆酒','龍舌蘭','伏特加','苦精','利口酒','其他'].map(c=>`<option${(b.cat||'威士忌')===c?' selected':''}>${c}</option>`).join('')}
+      </select></div>
+    <div class="field"><label>ABV (%)</label><input id="m-abv" type="number" step="0.1" value="${b.abv||''}"></div>
+    <div class="field"><label>風味（逗號分隔）</label><input id="m-flavor" value="${esc((b.flavor||[]).join('、'))}"><div class="field-hint">例：香草、焦糖、橡木</div></div>
+    <div class="field"><label>濃烈程度 1–5</label><input id="m-strength" type="number" min="1" max="5" value="${b.strength||3}"></div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeModal()">取消</button>
+      <button class="btn-submit" onclick="submitBottle(${editId||0})">儲存</button>
+    </div>
+  </div>`);
+}
+function submitBottle(editId){
+  const name=document.getElementById('m-name').value.trim();if(!name)return;
+  const data={name,en:document.getElementById('m-en').value.trim(),cat:document.getElementById('m-cat').value,abv:parseFloat(document.getElementById('m-abv').value)||0,flavor:document.getElementById('m-flavor').value.split(/[,，、]/).map(s=>s.trim()).filter(Boolean),strength:parseInt(document.getElementById('m-strength').value)||3,img:null};
+  if(editId){const b=BOTTLES.find(x=>x.id===editId);if(b){Object.assign(b,data);b.img=b.img;}}
+  else{data.id=nextId.bottle++;BOTTLES.push(data);}
+  closeModal();render(false);
+}
+
+// Add Recipe
+function openAddRecipeModal(editId){
+  const r=editId?RECIPES.find(x=>x.id===editId):{};
+  showModal(`<div class="modal">
+    <div class="modal-title">${editId?'編輯配方':'新增調酒'}</div>
+    <div class="field"><label>名稱</label><input id="m-name" value="${esc(r.name||'')}"></div>
+    <div class="field"><label>基酒</label><input id="m-base" value="${esc(r.base||'')}"></div>
+    <div class="field"><label>分類</label><input id="m-cat" value="${esc(r.cat||'')}"></div>
+    <div class="field"><label>描述</label><textarea id="m-desc">${esc(r.desc||'')}</textarea></div>
+    <div class="field"><label>調製方式（Stir / Shake / Build）</label><input id="m-method" value="${esc(r.method?.label||'')}"></div>
+    <div class="field"><label>調製說明</label><input id="m-method-sub" value="${esc(r.method?.sub||'')}"></div>
+    <div class="field"><label>杯型</label><input id="m-glass" value="${esc(r.glass?.label||'')}"></div>
+    <div class="field"><label>杯型說明</label><input id="m-glass-sub" value="${esc(r.glass?.sub||'')}"></div>
+    <div class="field"><label>材料（每行：中文名 / 英文名 / 用量）</label>
+      <textarea id="m-ingr" style="min-height:80px">${(r.ingr||[]).map(i=>`${i.zh} / ${i.en} / ${i.a}`).join('\n')}</textarea>
+      <div class="field-hint">例：波本威士忌 / Bourbon Whiskey / 60ml</div></div>
+    <div class="field"><label>步驟（每行一步）</label><textarea id="m-steps" style="min-height:80px">${(r.steps||[]).join('\n')}</textarea></div>
+    <div class="field"><label>裝飾（每行：裝飾名稱 / 說明）</label><textarea id="m-garnish">${(r.garnish||[]).map(g=>`${g.item} / ${g.note}`).join('\n')}</textarea></div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeModal()">取消</button>
+      <button class="btn-submit" onclick="submitRecipe(${editId||0})">儲存</button>
+    </div>
+  </div>`);
+}
+function openEditRecipeModal(id){openAddRecipeModal(id);}
+function submitRecipe(editId){
+  const name=document.getElementById('m-name').value.trim();if(!name)return;
+  const ingrLines=document.getElementById('m-ingr').value.trim().split('\n').filter(Boolean).map(l=>{
+    const p=l.split('/').map(s=>s.trim());
+    return{zh:p[0]||l,en:p[1]||'',a:p[2]||'',type:null,sel:null};
+  });
+  const data={name,base:document.getElementById('m-base').value.trim(),cat:document.getElementById('m-cat').value.trim(),desc:document.getElementById('m-desc').value.trim(),
+    method:{label:document.getElementById('m-method').value.trim(),sub:document.getElementById('m-method-sub').value.trim()},
+    glass:{label:document.getElementById('m-glass').value.trim(),sub:document.getElementById('m-glass-sub').value.trim()},
+    ingr:ingrLines,
+    steps:document.getElementById('m-steps').value.trim().split('\n').filter(Boolean),
+    garnish:document.getElementById('m-garnish').value.trim().split('\n').filter(Boolean).map(l=>{const p=l.split('/').map(s=>s.trim());return{item:p[0]||l,note:p[1]||''};})
+  };
+  if(editId){const r=RECIPES.find(x=>x.id===editId);if(r){const keep={id:r.id,fav:r.fav,img:r.img};Object.assign(r,data,keep);}}
+  else{data.id=nextId.recipe++;data.fav=false;data.img=null;RECIPES.push(data);}
+  closeModal();render(false);
+}
+
+// Add Food
+function openAddFoodModal(editId){
+  const r=editId?FOOD_RECIPES.find(x=>x.id===editId):{};
+  showModal(`<div class="modal">
+    <div class="modal-title">${editId?'編輯食譜':'新增食譜'}</div>
+    <div class="field"><label>名稱</label><input id="m-name" value="${esc(r.name||'')}"></div>
+    <div class="field"><label>分類</label><input id="m-cat" value="${esc(r.cat||'')}"></div>
+    <div class="field"><label>描述</label><textarea id="m-desc">${esc(r.desc||'')}</textarea></div>
+    <div class="field"><label>搭配調酒（可選）</label><input id="m-pair" value="${esc(r.pairing||'')}"></div>
+    <div class="field"><label>食材（每行：食材名稱 / 份量）</label>
+      <textarea id="m-ingr">${(r.ingr||[]).map(i=>`${i.item} / ${i.amt}`).join('\n')}</textarea></div>
+    <div class="field"><label>步驟（每行一步）</label><textarea id="m-steps" style="min-height:80px">${(r.steps||[]).join('\n')}</textarea></div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeModal()">取消</button>
+      <button class="btn-submit" onclick="submitFood(${editId||0})">儲存</button>
+    </div>
+  </div>`);
+}
+function openEditFoodModal(id){openAddFoodModal(id);}
+function submitFood(editId){
+  const name=document.getElementById('m-name').value.trim();if(!name)return;
+  const data={name,cat:document.getElementById('m-cat').value.trim(),desc:document.getElementById('m-desc').value.trim(),pairing:document.getElementById('m-pair').value.trim(),
+    ingr:document.getElementById('m-ingr').value.trim().split('\n').filter(Boolean).map(l=>{const p=l.split('/').map(s=>s.trim());return{item:p[0]||l,amt:p[1]||''};}),
+    steps:document.getElementById('m-steps').value.trim().split('\n').filter(Boolean),
+  };
+  if(editId){const r=FOOD_RECIPES.find(x=>x.id===editId);if(r){const keep={id:r.id,fav:r.fav,img:r.img};Object.assign(r,data,keep);}}
+  else{data.id=nextId.food++;data.fav=false;data.img=null;FOOD_RECIPES.push(data);}
+  closeModal();render(false);
+}
+
+// ─── INIT ────────────────────────────────────────────────
+document.querySelectorAll('.bnbtn').forEach(b=>b.addEventListener('click',()=>go(b.dataset.nav)));
+render(true);
+</script>
+</body>
+</html>
