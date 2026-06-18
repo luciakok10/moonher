@@ -823,11 +823,11 @@ const TWEAK_DIMS=[
   {key:'smoke',label:'煙燻感'},{key:'body',label:'酒感強度'},
 ];
 const TWEAK_TIPS={
-  acid:{reduce:['減少檸檬汁 3–5ml，加少量糖漿補平衡','以蜂蜜糖漿取代部分糖漿','延長攪拌5秒讓稀釋軟化酸感'],boost:['增加檸檬汁 5ml 或補入少量柚子汁','加 2 dash 柑橘苦精','多擠一點葡萄柚皮精油在液面']},
-  sweet:{reduce:['糖漿減少 3–5ml','增加苦精 1 dash 壓制甜感','縮短搖盪時間讓酒感更乾'],boost:['加入 5ml 蜂蜜糖漿或龍舌蘭蜜','接骨木花利口酒增加 5ml','杯底放糖漬櫻桃']},
-  bitter:{reduce:['苦精整體減量 1 dash','增加甜味利口酒 5ml 蓋住苦感','加入少量鹽水 1 dash 中和苦味'],boost:['安格仕苦精加到 4–5 dash','加入 Campari 5ml','少量 Fernet-Branca 1–2ml']},
-  smoke:{reduce:['泥煤威士忌由 5ml 減為 2–3ml','改用調和威士忌取代泥煤','不做漂浮，直接攪拌稀釋煙燻'],boost:['泥煤威士忌增加至 10ml','攪拌前先用泥煤威士忌潤杯','噴霧器在杯內噴一下泥煤']},
-  body:{reduce:['基酒減少 5ml，加氣泡水 10ml','縮短攪拌時間至 25 秒','換用較輕盈的調和威士忌'],boost:['基酒增加至 50ml','攪拌延長至 45 秒','加入少量 Demerara 糖漿 3ml']},
+  acid:{reduce:['太酸了：直接往杯裡加 5ml 糖漿（或蜂蜜糖漿）平衡','加一點氣泡水或水稀釋整杯酸度','補一點點利口酒（如接骨木花）增加甜潤感'],boost:['不夠酸：擠 5ml 新鮮檸檬汁進去再攪一下','加 1–2 dash 柑橘苦精提亮','擠一點葡萄柚皮或檸檬皮精油在液面']},
+  sweet:{reduce:['太甜了：擠 3–5ml 新鮮檸檬汁進去中和','加 1 dash 苦精壓甜','加一點氣泡水或水稀釋甜度'],boost:['不夠甜：往杯裡加 5ml 糖漿或蜂蜜糖漿','加 5ml 甜型利口酒（接骨木花、荔枝等）','補一點果汁增加果甜']},
+  bitter:{reduce:['太苦了：加 5ml 糖漿或甜利口酒蓋住苦感','擠一點檸檬汁轉移苦韻','加一點氣泡水稀釋'],boost:['不夠苦：滴 1–2 dash 安格仕苦精進去','加 5ml Campari 或 Amaro','滴一點點 Fernet-Branca']},
+  smoke:{reduce:['太煙燻了：加一點糖漿或果汁柔化','加氣泡水稀釋整體','擠一點柑橘皮精油轉移焦點'],boost:['不夠煙燻：用湯匙背面在液面漂浮 5ml 泥煤威士忌','拿泥煤威士忌噴一下杯口','滴幾滴泥煤威士忌在表面']},
+  body:{reduce:['酒感太重：加 10–15ml 氣泡水或水稀釋','加冰塊讓融水降低酒感','補一點果汁或糖漿轉移注意力'],boost:['酒感太弱：用湯匙背面漂浮 5–10ml 基酒在液面','滴幾滴高濃度苦精增加層次','加 3ml 糖漿增加厚度與口感']},
 };
 
 // ─── APP STATE ───────────────────────────────────────────
@@ -1131,7 +1131,7 @@ function renderSpecialResult(){
           ${r.base_reason?`<div style="font-size:11px;color:var(--muted);margin-top:4px">選這瓶的原因：${esc(r.base_reason)}</div>`:''}
         </div>
         <div><div class="sl">材料</div>
-          ${(r.ingredients||[]).map(i=>`<div class="ingr-row2"><div><div class="iz">${esc(i.zh)}</div><div class="ien">${esc(i.en)}</div></div><div class="iamt">${esc(i.amount)}</div></div>`).join('')}
+          ${(r.ingredients||[]).map(i=>{const zh=i.zh||i.name||i.material||i.ingredient||'';const en=i.en||i.name_en||i.english||'';const amt=i.amount||i.amt||i.a||i.qty||'';return `<div class="ingr-row2"><div><div class="iz">${esc(zh)}</div>${en?`<div class="ien">${esc(en)}</div>`:''}</div><div class="iamt">${esc(amt)}</div></div>`;}).join('')}
         </div>
         <div><div class="sl">調製方式 &amp; 杯型</div><div class="mg2-row">
           <div class="mg2-card"><div class="mgl">調製方式</div><div class="mgv">${esc(r.method||'—')}</div><div class="mgs">${esc(r.method_note||'')}</div></div>
@@ -1141,7 +1141,7 @@ function renderSpecialResult(){
           ${(r.steps||[]).map((s,i)=>`<div class="step-row"><span class="snum">${i+1}</span><span>${esc(s)}</span></div>`).join('')}
         </div></div>
         ${(r.garnish||[]).length?`<div class="garnish-card" style="margin-bottom:0"><div class="gtitle">裝飾 / Garnish</div>
-          ${r.garnish.map(g=>`<div class="gi"><div class="gdot"></div><div><div>${esc(g.item)}</div><div class="gnote">${esc(g.note||'')}</div></div></div>`).join('')}
+          ${r.garnish.map(g=>{const it=g.item||g.name||g.zh||'';const nt=g.note||g.reason||'';return `<div class="gi"><div class="gdot"></div><div><div>${esc(it)}</div>${nt?`<div class="gnote">${esc(nt)}</div>`:''}</div></div>`;}).join('')}
         </div>`:''}
         ${r.bartender_note?`<div><div class="sl">調酒師備註</div><div class="note-box">${esc(r.bartender_note)}</div></div>`:''}
         <button class="btn-gen" onclick="spRegenerate()">↺ 重新生成</button>
@@ -1357,7 +1357,7 @@ function spGenerate(){
   const sp=APP.sp;if(!sp.selCat)return;
   const bottles=catBottles(sp.selCat);
   const pLines=PREFS.map(p=>sp.prefs[p.key]?`${p.label}：${sp.prefs[p.key]}`:null).filter(Boolean).join('、');
-  sp._reqText=`【特調生成請求】基酒：${sp.selCat} | 喜好：${pLines||'自由發揮'} | 酒櫃：${bottles.map(b=>b.name).join('、')}\n\n請以 JSON 格式回覆一款特調配方（包含 name、name_en、concept、base_bottle、base_reason、method、method_note、glass、glass_note、ingredients陣列、steps陣列、garnish陣列、flavor_tags陣列、bartender_note）。請在 JSON 前後加上 ===JSON_START=== 和 ===JSON_END=== 標記。`;
+  sp._reqText=`【特調生成請求】基酒：${sp.selCat} | 喜好：${pLines||'自由發揮'} | 酒櫃：${bottles.map(b=>b.name).join('、')}\n\n請以 JSON 格式回覆一款特調配方，務必使用以下確切的欄位名稱：\n{\n  "name": "中文酒名",\n  "name_en": "英文酒名",\n  "concept": "風味概念說明",\n  "base_bottle": "建議使用的酒款名",\n  "base_reason": "選這瓶的原因",\n  "method": "調製方式如Shake/Stir/Build",\n  "method_note": "調製說明",\n  "glass": "杯型",\n  "glass_note": "杯型說明",\n  "ingredients": [{"zh":"材料中文名","en":"材料英文名","amount":"45ml"}],\n  "steps": ["步驟1","步驟2"],\n  "garnish": [{"item":"裝飾名","note":"說明"}],\n  "flavor_tags": ["風味標籤1","風味標籤2"],\n  "bartender_note": "調酒師備註"\n}\n注意：ingredients 陣列裡每個材料一定要有 zh、en、amount 三個欄位。請在 JSON 前後加上 ===JSON_START=== 和 ===JSON_END=== 標記。`;
   sp.step='copy';
   render(true);
 }
